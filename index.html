@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WordPal</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Sans:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
+<!-- ============================================================ -->
+<!--  WHITE-LABEL CONFIG — Edit these values for each church     -->
+<!-- ============================================================ -->
+<script>
+var WL = {
+  MINISTRY_NAME:  "IronPal",
+  MINISTRY_TAG:   "Men's Bible Study",
+  MINISTRY_ICON:  "⚒",
+  ACCENT:         "#C8922A",
+  ACCENT2:        "#E8B84B",
+  DARK_MODE:      true,
+  POWERED_BY:     true,
+
+  // Supabase
+  SUPABASE_URL:   "https://YOUR_PROJECT.supabase.co",
+  SUPABASE_ANON:  "YOUR_ANON_KEY",
+
+  // Encryption — generate a random string and paste it here.
+  // This is the shared room key. Keep it secret. All members of
+  // this group get it automatically when they load this page.
+  ROOM_KEY:       "REPLACE_WITH_RANDOM_32_CHAR_STRING",
+
+  // Access PINs
+  LEADER_PIN:     "1234",
+  MEMBER_PIN:     "5678",
+
+  // Web Push — generate your VAPID key pair at https://vapidkeys.com
+  // Paste the PUBLIC key here. Keep the private key in Supabase secrets only.
+  VAPID_PUBLIC_KEY: "REPLACE_WITH_YOUR_VAPID_PUBLIC_KEY"
+};
+</script>
+<!-- ============================================================ -->
+
+<style>
+:root{--navy:#0D1117;--navy2:#161B22;--navy3:#1C2128;--gold:#C8922A;--gold2:#E8B84B;--text:#E6EDF3;--muted:#7D8590;--border:rgba(255,255,255,0.08);--glass:rgba(255,255,255,0.04);--safe:#22c55e;--radius:12px;}
+.light{--navy:#F7F9FB;--navy2:#FFFFFF;--navy3:#EDF2F7;--text:#2D3748;--muted:#718096;--border:rgba(0,0,0,0.1);--glass:rgba(0,0,0,0.02);}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--navy);color:var(--text);min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 20% 20%,rgba(200,146,42,.06),transparent 50%),radial-gradient(ellipse at 80% 80%,rgba(200,146,42,.04),transparent 50%);pointer-events:none;}
+
+/* LANDING */
+#landing{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;text-align:center;}
+.logo-mark{font-family:'Playfair Display',serif;font-size:3.2rem;font-weight:700;background:linear-gradient(135deg,var(--gold),var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:4px;}
+.logo-sub{font-size:.75rem;font-weight:600;letter-spacing:3px;color:var(--muted);text-transform:uppercase;margin-bottom:36px;}
+.enc-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.3);border-radius:100px;padding:6px 16px;font-size:.78rem;font-weight:600;color:var(--safe);margin-bottom:28px;}
+.landing-cards{display:flex;gap:20px;flex-wrap:wrap;justify-content:center;max-width:680px;}
+.landing-card{background:var(--glass);border:1px solid var(--border);border-radius:20px;padding:32px 28px;flex:1;min-width:250px;cursor:pointer;transition:all .3s;position:relative;overflow:hidden;text-align:left;}
+.landing-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:20px 20px 0 0;}
+.lc-leader::before{background:linear-gradient(90deg,var(--gold),var(--gold2));}
+.lc-member::before{background:linear-gradient(90deg,#5B8BF5,#8B5CF6);}
+.landing-card:hover{border-color:rgba(255,255,255,.18);transform:translateY(-4px);}
+.card-icon{font-size:2.2rem;margin-bottom:14px;display:block;}
+.card-title{font-family:'Playfair Display',serif;font-size:1.55rem;font-weight:700;margin-bottom:8px;}
+.card-desc{font-size:.87rem;color:var(--muted);line-height:1.6;}
+.card-cta{margin-top:18px;font-size:.8rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;}
+.lc-leader .card-cta{color:var(--gold);}
+.lc-member .card-cta{color:#5B8BF5;}
+.powered-by{display:none;font-size:.7rem;color:var(--muted);margin-top:24px;}
+
+/* GATE SCREENS */
+.gate{min-height:100vh;display:none;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;text-align:center;}
+.gate-card{background:var(--glass);border:1px solid var(--border);border-radius:22px;padding:38px 30px;max-width:380px;width:100%;}
+.gate-enc{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);border-radius:10px;padding:12px;margin:14px 0;font-size:.82rem;color:var(--safe);line-height:1.6;}
+.pin-err{display:none;font-size:.78rem;color:#ef4444;margin-bottom:10px;font-weight:600;}
+
+/* APP SHELL */
+#app{display:none;flex-direction:column;min-height:100vh;}
+.topbar{background:var(--navy2);border-bottom:1px solid var(--border);padding:0 22px;height:58px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.topbar-left{display:flex;align-items:center;gap:12px;}
+.topbar-logo{font-family:'Playfair Display',serif;font-size:1.35rem;font-weight:700;background:linear-gradient(135deg,var(--gold),var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.mode-pill{font-size:.7rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:3px 10px;border-radius:100px;}
+.pill-leader{background:rgba(200,146,42,.15);color:var(--gold);}
+.pill-member{background:rgba(91,139,245,.15);color:#5B8BF5;}
+.enc-status{display:flex;align-items:center;gap:6px;font-size:.76rem;font-weight:600;cursor:pointer;padding:5px 11px;border-radius:100px;border:1px solid rgba(34,197,94,.3);background:rgba(34,197,94,.08);color:var(--safe);}
+.enc-dot{width:6px;height:6px;border-radius:50%;background:var(--safe);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.35;}}
+
+/* TABS */
+.tab-bar{background:var(--navy2);border-bottom:1px solid var(--border);display:flex;padding:0 18px;gap:2px;overflow-x:auto;}
+.tab-btn{background:none;border:none;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:.81rem;font-weight:600;padding:13px 13px;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap;}
+.tab-btn.active{color:var(--text);border-bottom-color:var(--gold);}
+
+/* MAIN */
+.main{flex:1;padding:22px 18px;max-width:860px;margin:0 auto;width:100%;}
+.section{display:none;}.section.active{display:block;}
+.card{background:var(--glass);border:1px solid var(--border);border-radius:var(--radius);padding:22px;margin-bottom:18px;}
+.card-heading{font-family:'Playfair Display',serif;font-size:.95rem;font-style:italic;color:var(--muted);margin-bottom:16px;}
+
+/* INPUTS */
+.txt-input{background:var(--navy3);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.9rem;padding:10px 13px;width:100%;outline:none;margin-bottom:10px;transition:border-color .2s;}
+.txt-input:focus{border-color:rgba(200,146,42,.5);}
+textarea.txt-input{resize:vertical;min-height:78px;line-height:1.6;}
+
+/* BUTTONS */
+.btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#0D1117;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:.9rem;font-weight:700;padding:10px 20px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:all .2s;}
+.btn-gold:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(200,146,42,.4);}
+.btn-gold:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none;}
+.btn-sm{background:var(--glass);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.8rem;font-weight:600;padding:7px 13px;cursor:pointer;transition:all .2s;}
+.btn-sm:hover{border-color:rgba(200,146,42,.4);}
+.btn-danger{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#ef4444;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.82rem;font-weight:600;padding:5px 10px;cursor:pointer;white-space:nowrap;}
+
+/* TYPE SELECTOR */
+.type-row{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;}
+.type-btn{background:var(--navy3);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:.81rem;font-weight:600;padding:7px 13px;cursor:pointer;transition:all .2s;}
+.type-btn.active{border-color:var(--gold);color:var(--gold);background:rgba(200,146,42,.1);}
+
+/* TRANSLATION BUTTONS */
+.trans-row{display:flex;gap:6px;margin-bottom:13px;flex-wrap:wrap;}
+.trans-btn{background:var(--navy3);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:.78rem;font-weight:700;padding:5px 11px;cursor:pointer;transition:all .2s;}
+.trans-btn.active{background:var(--gold);color:#0D1117;border-color:var(--gold);}
+
+/* VERSE PREVIEW */
+.verse-preview{background:var(--navy3);border:1px solid var(--border);border-left:3px solid var(--gold);border-radius:10px;padding:16px 18px;margin-bottom:14px;display:none;}
+.verse-text{font-family:'Playfair Display',serif;font-size:1.08rem;font-style:italic;color:var(--text);line-height:1.78;}
+.verse-ref{font-size:.81rem;font-weight:700;color:var(--gold);margin-top:8px;}
+
+/* TOGGLE */
+.toggle-row{display:flex;align-items:center;gap:10px;margin-bottom:12px;cursor:pointer;}
+.toggle{position:relative;width:38px;height:21px;flex-shrink:0;}
+.toggle input{opacity:0;width:0;height:0;}
+.tslider{position:absolute;inset:0;background:var(--border);border-radius:100px;cursor:pointer;transition:.3s;}
+.tslider:before{content:'';position:absolute;width:15px;height:15px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.3s;}
+.toggle input:checked+.tslider{background:var(--gold);}
+.toggle input:checked+.tslider:before{transform:translateX(17px);}
+
+/* MESSAGE FEED */
+.feed{display:flex;flex-direction:column;gap:14px;}
+.msg{background:var(--navy3);border:1px solid var(--border);border-radius:14px;padding:16px 18px;animation:fadeUp .3s;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+.msg.scripture {border-left:4px solid var(--gold);}
+.msg.discussion{border-left:4px solid #5B8BF5;}
+.msg.prayer    {border-left:4px solid #7BAD85;}
+.msg.announce  {border-left:4px solid #D4864A;}
+.msg-header{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap;}
+.type-badge{font-size:.7rem;font-weight:700;letter-spacing:.8px;text-transform:uppercase;padding:2px 8px;border-radius:100px;}
+.tb-scripture {background:rgba(200,146,42,.15);color:var(--gold);}
+.tb-discussion{background:rgba(91,139,245,.15); color:#5B8BF5;}
+.tb-prayer    {background:rgba(123,173,133,.15); color:#7BAD85;}
+.tb-announce  {background:rgba(212,134,74,.15);  color:#D4864A;}
+.msg-from{font-size:.82rem;font-weight:700;color:var(--text);}
+.msg-date{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--muted);margin-left:auto;}
+.msg-enc{font-size:.68rem;color:var(--safe);font-weight:600;}
+.msg-verse{font-family:'Playfair Display',serif;font-size:1.08rem;font-style:italic;color:var(--text);line-height:1.76;margin-bottom:6px;}
+.msg-ref{font-size:.82rem;font-weight:700;color:var(--gold);}
+.msg-body{font-size:.93rem;color:var(--text);line-height:1.65;}
+.msg-actions{margin-top:10px;padding-top:10px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;}
+
+/* NEW badge */
+.new-badge{font-size:.68rem;background:rgba(34,197,94,.15);color:var(--safe);border:1px solid rgba(34,197,94,.3);border-radius:4px;padding:1px 6px;font-weight:700;}
+
+/* EMPTY / LOADING */
+.empty-state{text-align:center;padding:48px 20px;color:var(--muted);font-size:.88rem;}
+.empty-icon{font-size:2.4rem;margin-bottom:12px;}
+.loading-dots{display:flex;justify-content:center;gap:6px;margin-top:12px;}
+.loading-dot{width:8px;height:8px;border-radius:50%;background:var(--gold);animation:pulse 1.5s ease-in-out infinite;}
+
+/* STATS */
+.stats-row{display:flex;gap:12px;margin-bottom:18px;flex-wrap:wrap;}
+.stat-card{background:var(--glass);border:1px solid var(--border);border-radius:10px;padding:13px 16px;flex:1;min-width:80px;}
+.stat-val{font-family:'Playfair Display',serif;font-size:1.8rem;color:var(--gold);line-height:1;margin-bottom:4px;}
+.stat-lbl{font-size:.7rem;color:var(--muted);font-weight:600;}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);z-index:200;display:none;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--navy2);border:1px solid var(--border);border-radius:20px;padding:30px;max-width:440px;width:100%;}
+.modal-title{font-family:'Playfair Display',serif;font-size:1.45rem;margin-bottom:18px;color:var(--safe);}
+.er{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);font-size:.87rem;}
+.el{color:var(--muted);}
+.ev{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--safe);font-weight:600;}
+.fp-box{background:var(--navy3);border:1px solid rgba(34,197,94,.2);border-radius:10px;padding:14px;margin-top:14px;text-align:center;}
+.fp-lbl{font-size:.7rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;}
+.fp-val{font-family:'JetBrains Mono',monospace;font-size:1.05rem;font-weight:600;color:var(--safe);letter-spacing:3px;}
+.modal-close{width:100%;margin-top:18px;background:var(--glass);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.9rem;font-weight:600;padding:11px;cursor:pointer;}
+
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--navy2);border:1px solid var(--border);border-radius:100px;padding:9px 20px;font-size:.85rem;font-weight:600;color:var(--text);z-index:300;opacity:0;transition:all .3s;white-space:nowrap;pointer-events:none;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+@media(max-width:580px){.main{padding:14px 12px;}.topbar{padding:0 14px;}.landing-card{min-width:220px;}}
+</style>
+</head>
+<body>
+
+<!-- ── LANDING ─────────────────────────────────────────────────────────────── -->
+<div id="landing">
+  <div class="logo-mark wl-name">WordPal</div>
+  <div class="logo-sub wl-tag">Bible Study</div>
+  <div class="enc-badge">🔒 AES-256 End-to-End Encrypted</div>
+  <div class="landing-cards">
+    <div class="landing-card lc-leader" onclick="openGate('leader')">
+      <span class="card-icon">🎛</span>
+      <div class="card-title">Leader</div>
+      <div class="card-desc">Post scripture, discussion questions, prayer requests and announcements for your group to read anytime.</div>
+      <div class="card-cta">Open Leader Panel →</div>
+    </div>
+    <div class="landing-card lc-member" onclick="openGate('member')">
+      <span class="card-icon">📖</span>
+      <div class="card-title">Member</div>
+      <div class="card-desc">Read everything your leader has posted — scripture, questions, prayer and news — at your own pace.</div>
+      <div class="card-cta">Open My Feed →</div>
+    </div>
+  </div>
+  <div class="powered-by">Powered by <a href="https://wordpal.fun" target="_blank" style="color:var(--gold);">WordPal.fun</a></div>
+</div>
+
+<!-- ── LEADER GATE ─────────────────────────────────────────────────────────── -->
+<div id="leader-gate" class="gate">
+  <div class="logo-mark wl-name">WordPal</div>
+  <div class="logo-sub wl-tag">Bible Study</div>
+  <div class="gate-card">
+    <div style="font-size:2.2rem;margin-bottom:12px;">🎛</div>
+    <div style="font-family:'Playfair Display',serif;font-size:1.45rem;margin-bottom:4px;">Leader Access</div>
+    <div style="font-size:.8rem;color:var(--muted);margin-bottom:4px;" class="wl-tag"></div>
+    <div class="gate-enc">🔒 Leader PIN required.</div>
+    <input class="txt-input" id="lg-name" placeholder="Your name (e.g. Pastor John)" style="margin-bottom:10px;">
+    <input class="txt-input" id="lg-pin" type="password" inputmode="numeric" maxlength="12" placeholder="Leader PIN" style="text-align:center;letter-spacing:.2em;margin-bottom:6px;" onkeydown="if(event.key==='Enter')submitGate('leader')">
+    <div class="pin-err" id="lg-err">Incorrect PIN — try again.</div>
+    <button class="btn-gold" style="width:100%;justify-content:center;margin-bottom:10px;" onclick="submitGate('leader')">Enter Leader Panel</button>
+    <button class="btn-sm" style="width:100%;" onclick="goHome()">← Back</button>
+  </div>
+</div>
+
+<!-- ── MEMBER GATE ─────────────────────────────────────────────────────────── -->
+<div id="member-gate" class="gate">
+  <div class="logo-mark wl-name">WordPal</div>
+  <div class="logo-sub wl-tag">Bible Study</div>
+  <div class="gate-card">
+    <div style="font-size:2.2rem;margin-bottom:12px;">📖</div>
+    <div style="font-family:'Playfair Display',serif;font-size:1.45rem;margin-bottom:4px;" class="wl-name">WordPal</div>
+    <div style="font-size:.8rem;color:var(--muted);margin-bottom:4px;" class="wl-tag"></div>
+    <div class="gate-enc">🔒 Messages are end-to-end encrypted. Only members of this group can read them.</div>
+    <input class="txt-input" id="mg-name" placeholder="Your name (e.g. John Smith)" style="margin-bottom:10px;">
+    <input class="txt-input" id="mg-pin" type="password" inputmode="numeric" maxlength="12" placeholder="Group PIN" style="text-align:center;letter-spacing:.2em;margin-bottom:6px;" onkeydown="if(event.key==='Enter')submitGate('member')">
+    <div class="pin-err" id="mg-err">Incorrect PIN — try again.</div>
+    <button class="btn-gold" style="width:100%;justify-content:center;margin-bottom:10px;" onclick="submitGate('member')">Open My Feed</button>
+    <button class="btn-sm" style="width:100%;" onclick="goHome()">← Back</button>
+  </div>
+</div>
+
+<!-- ── MAIN APP ────────────────────────────────────────────────────────────── -->
+<div id="app">
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-logo wl-name">WordPal</div>
+      <div class="mode-pill" id="mode-pill">LEADER</div>
+    </div>
+    <div class="enc-status" onclick="showEncInfo()"><div class="enc-dot"></div> 🔒 E2E</div>
+  </div>
+
+  <!-- LEADER TABS -->
+  <div class="tab-bar" id="leader-tabs" style="display:none;">
+    <button class="tab-btn active" onclick="switchTab('post',this)">✏️ Post</button>
+    <button class="tab-btn" onclick="switchTab('feed',this)">📋 All Posts</button>
+    <button class="tab-btn" onclick="switchTab('manage',this)">⚙️ Manage</button>
+  </div>
+
+  <!-- MEMBER TABS -->
+  <div class="tab-bar" id="member-tabs" style="display:none;">
+    <button class="tab-btn active" onclick="switchTab('feed',this)">📖 My Feed</button>
+    <button class="tab-btn" onclick="switchTab('notify',this)">🔔 Notifications</button>
+  </div>
+
+  <div class="main">
+
+    <!-- ── POST TAB (leader only) ── -->
+    <div id="tab-post" class="section active">
+      <div class="card">
+        <div class="card-heading">What do you want to share?</div>
+        <div class="type-row">
+          <button class="type-btn active" onclick="setType('scripture',this)">📖 Scripture</button>
+          <button class="type-btn" onclick="setType('discussion',this)">💬 Discussion</button>
+          <button class="type-btn" onclick="setType('prayer',this)">🙏 Prayer</button>
+          <button class="type-btn" onclick="setType('announce',this)">📢 Announce</button>
+        </div>
+
+        <!-- Scripture -->
+        <div id="panel-scripture">
+          <div class="trans-row" id="trans-row"></div>
+          <label class="toggle-row">
+            <label class="toggle"><input type="checkbox" id="custom-chk" onchange="toggleCustom()"><span class="tslider"></span></label>
+            <span style="font-size:.84rem;color:var(--muted);font-weight:600;">Enter custom verse</span>
+          </label>
+          <div id="preset-wrap">
+            <select class="txt-input" id="verse-sel" style="cursor:pointer;" onchange="updatePreview()"></select>
+          </div>
+          <div id="custom-wrap" style="display:none;">
+            <input class="txt-input" id="cust-ref" placeholder="Reference (e.g. Matthew 5:9)" oninput="updatePreview()">
+            <textarea class="txt-input" id="cust-text" placeholder="Verse text…" rows="3" oninput="updatePreview()"></textarea>
+          </div>
+          <div class="verse-preview" id="verse-preview">
+            <div class="verse-text" id="preview-text"></div>
+            <div class="verse-ref"  id="preview-ref"></div>
+          </div>
+          <textarea class="txt-input" id="scripture-note" placeholder="Add a note or reflection (optional)…" rows="2"></textarea>
+        </div>
+
+        <!-- Discussion -->
+        <div id="panel-discussion" style="display:none;">
+          <textarea class="txt-input" id="disc-text" placeholder="Type your discussion question for the group…" rows="4"></textarea>
+        </div>
+
+        <!-- Prayer -->
+        <div id="panel-prayer" style="display:none;">
+          <textarea class="txt-input" id="pray-text" placeholder="Type your prayer focus or request…" rows="4"></textarea>
+        </div>
+
+        <!-- Announce -->
+        <div id="panel-announce" style="display:none;">
+          <input class="txt-input" id="ann-title" placeholder="Title (e.g. This Week's Meeting)">
+          <textarea class="txt-input" id="ann-text" placeholder="Type your announcement…" rows="4"></textarea>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:4px;">
+          <button class="btn-gold" onclick="postMessage()" id="post-btn">🔒 Post Encrypted</button>
+          <span id="post-ok" style="display:none;font-size:.78rem;color:var(--safe);font-weight:600;">✓ Posted</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── FEED TAB (leader + member) ── -->
+    <div id="tab-feed" class="section">
+      <div id="feed-loading" class="empty-state">
+        <div class="empty-icon">🔒</div>
+        <div>Loading encrypted messages…</div>
+        <div class="loading-dots" style="margin-top:12px;">
+          <div class="loading-dot" style="animation-delay:0s"></div>
+          <div class="loading-dot" style="animation-delay:.3s"></div>
+          <div class="loading-dot" style="animation-delay:.6s"></div>
+        </div>
+      </div>
+      <div id="feed-empty" class="empty-state" style="display:none;">
+        <div class="empty-icon wl-icon">📖</div>
+        <div style="font-family:'Playfair Display',serif;font-size:1.1rem;margin-bottom:6px;">Nothing posted yet</div>
+        <div>Your leader's posts will appear here.</div>
+      </div>
+      <div class="feed" id="feed-list"></div>
+    </div>
+
+    <!-- ── MANAGE TAB (leader only) ── -->
+    <div id="tab-manage" class="section">
+      <div class="card">
+        <div class="card-heading">Your Display Name</div>
+        <input class="txt-input" id="leader-name" value="Pastor" placeholder="Shown on every post" style="margin:0;">
+      </div>
+      <div class="card">
+        <div class="stats-row">
+          <div class="stat-card"><div class="stat-val" id="stat-posts">0</div><div class="stat-lbl"><span id="posts-lbl">0</span> / 500 posts</div></div>
+          <div class="stat-card"><div class="stat-val" id="stat-members">—</div><div class="stat-lbl">Members</div></div>
+        </div>
+        <div style="font-size:.85rem;color:var(--muted);line-height:1.65;margin-bottom:14px;">Individual posts can be deleted from the All Posts tab. To clear all posts for this group, use the button below.</div>
+        <button class="btn-danger" onclick="confirmDeleteAll()">🗑 Delete All Posts</button>
+      </div>
+      <div class="card">
+        <div style="font-size:.85rem;color:var(--muted);line-height:1.65;margin-bottom:14px;">Sign out and return to the home screen.</div>
+        <button class="btn-sm" onclick="goHome()">← Sign Out</button>
+      </div>
+    </div>
+
+
+    <!-- ── NOTIFY TAB (member only) ── -->
+    <div id="tab-notify" class="section">
+      <div class="card" style="text-align:center;padding:36px 24px;">
+        <div style="font-size:3rem;margin-bottom:16px;" id="notif-icon">🔔</div>
+        <div style="font-family:'Playfair Display',serif;font-size:1.3rem;margin-bottom:8px;" id="notif-title">Get Notified</div>
+        <div style="font-size:.88rem;color:var(--muted);line-height:1.7;margin-bottom:24px;max-width:320px;margin-left:auto;margin-right:auto;" id="notif-desc">
+          Get a notification on your phone whenever your leader posts something new — even when the app is closed.
+        </div>
+        <div id="notif-ios-hint" style="display:none;background:rgba(200,146,42,.08);border:1px solid rgba(200,146,42,.25);border-radius:10px;padding:14px 16px;font-size:.82rem;color:var(--gold);line-height:1.7;margin-bottom:20px;text-align:left;">
+          📱 <strong>iPhone users:</strong> First add this page to your Home Screen.<br>
+          Tap the Share button → <em>Add to Home Screen</em> → Open the app from there. Then come back here to enable notifications.
+        </div>
+        <button class="btn-gold" style="justify-content:center;" id="notif-btn" onclick="handleNotifBtn()">
+          Enable Notifications
+        </button>
+        <div style="margin-top:12px;font-size:.75rem;color:var(--muted);" id="notif-status"></div>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<!-- ENC MODAL -->
+<div class="modal-overlay" id="enc-modal">
+  <div class="modal">
+    <div class="modal-title">🔒 Encryption Details</div>
+    <div class="er"><span class="el">Algorithm</span><span class="ev">AES-GCM 256-bit</span></div>
+    <div class="er"><span class="el">Key Source</span><span class="ev">WL Config (never transmitted)</span></div>
+    <div class="er"><span class="el">Key Storage</span><span class="ev">Client only</span></div>
+    <div class="er"><span class="el">Server Can Read?</span><span class="ev" style="color:#ef4444;">NO</span></div>
+    <div class="er"><span class="el">Supabase Stores?</span><span class="ev">Encrypted ciphertext only</span></div>
+    <div class="fp-box">
+      <div class="fp-lbl">Room Key Fingerprint</div>
+      <div class="fp-val" id="fingerprint">——</div>
+    </div>
+    <button class="modal-close" onclick="id('enc-modal').classList.remove('open')">Close</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- ── SCRIPT ──────────────────────────────────────────────────────────────── -->
+<script>
+// === STATE ===
+var mode='', userName='', roomKey=null, sbClient=null, sbChannel=null;
+var currentType='scripture', currentTrans='NIV', useCustom=false;
+var allPosts=[], lastSeen=0;
+
+// === INIT ===
+document.addEventListener('DOMContentLoaded',function(){
+  if(!WL.DARK_MODE) document.body.classList.add('light');
+  document.documentElement.style.setProperty('--gold', WL.ACCENT);
+  document.documentElement.style.setProperty('--gold2',WL.ACCENT2);
+  document.querySelectorAll('.wl-name').forEach(function(e){e.textContent=WL.MINISTRY_NAME;});
+  document.querySelectorAll('.wl-tag').forEach(function(e){ e.textContent=WL.MINISTRY_TAG;});
+  document.querySelectorAll('.wl-icon').forEach(function(e){ e.textContent=WL.MINISTRY_ICON;});
+  document.title=WL.MINISTRY_NAME;
+  if(WL.POWERED_BY) document.querySelectorAll('.powered-by').forEach(function(e){e.style.display='block';});
+  buildVerseUI();
+  initCrypto();
+});
+
+// === CRYPTO ===
+// Key is derived from WL.ROOM_KEY — same for everyone in this group.
+// Stored only in this HTML file, never transmitted.
+async function initCrypto(){
+  try{
+    var keyMaterial=await crypto.subtle.importKey(
+      'raw', new TextEncoder().encode(WL.ROOM_KEY.padEnd(32,'0').slice(0,32)),
+      {name:'PBKDF2'}, false, ['deriveKey']
+    );
+    roomKey=await crypto.subtle.deriveKey(
+      {name:'PBKDF2',salt:new TextEncoder().encode('wordpal-v1'),iterations:100000,hash:'SHA-256'},
+      keyMaterial, {name:'AES-GCM',length:256}, true, ['encrypt','decrypt']
+    );
+    // Show fingerprint
+    var raw=await crypto.subtle.exportKey('raw',roomKey);
+    var hash=await crypto.subtle.digest('SHA-256',raw);
+    var bytes=new Uint8Array(hash),parts=[];
+    for(var i=0;i<6;i++) parts.push(bytes[i].toString(16).padStart(2,'0').toUpperCase());
+    id('fingerprint').textContent=parts.join('-');
+  }catch(e){console.error('Crypto init failed:',e);}
+}
+
+async function enc(obj){
+  var iv=crypto.getRandomValues(new Uint8Array(12));
+  var ct=await crypto.subtle.encrypt({name:'AES-GCM',iv:iv},roomKey,new TextEncoder().encode(JSON.stringify(obj)));
+  var out=new Uint8Array(12+ct.byteLength);out.set(iv);out.set(new Uint8Array(ct),12);
+  return btoa(String.fromCharCode.apply(null,out));
+}
+async function dec(b64){
+  try{
+    var b=new Uint8Array(atob(b64).split('').map(function(c){return c.charCodeAt(0);}));
+    var d=await crypto.subtle.decrypt({name:'AES-GCM',iv:b.slice(0,12)},roomKey,b.slice(12));
+    return JSON.parse(new TextDecoder().decode(d));
+  }catch(e){return null;}
+}
+
+// === SUPABASE ===
+function initSB(){
+  try{sbClient=supabase.createClient(WL.SUPABASE_URL,WL.SUPABASE_ANON);}
+  catch(e){console.warn('Supabase unavailable');}
+}
+
+// Subscribe to realtime so new posts appear instantly for open members
+function subscribeRealtime(){
+  if(!sbClient)return;
+  sbChannel=sbClient.channel('wordpal-posts')
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'wp_messages'},function(payload){
+      // A new row was inserted — decrypt and prepend to feed
+      var row=payload.new;
+      if(row.tenant===tenantId()){
+        dec(row.payload).then(function(obj){
+          if(obj){
+            obj._id=row.id;obj._at=row.created_at;obj._new=true;
+            allPosts.unshift(obj);
+            renderFeed();
+            id('stat-posts').textContent=allPosts.length;
+  var pct=allPosts.length/500;
+  var sc=id('stat-posts');
+  sc.style.color=pct>=1?'#ef4444':pct>=.8?'#f59e0b':'var(--gold)';
+  var lbl=id('posts-lbl');if(lbl)lbl.textContent=allPosts.length;
+          }
+        });
+      }
+    })
+    .subscribe();
+}
+
+function tenantId(){
+  // Derive a stable tenant ID from the ministry name + room key fingerprint
+  // so different churches on the same Supabase don't see each other's rows
+  return WL.MINISTRY_NAME.toLowerCase().replace(/[^a-z0-9]/g,'-');
+}
+
+// === GATES ===
+function goHome(){
+  ['leader-gate','member-gate'].forEach(function(x){id(x).style.display='none';});
+  id('app').style.display='none';
+  id('landing').style.display='flex';
+  mode='';
+}
+
+function openGate(which){
+  id('landing').style.display='none';
+  id(which+'-gate').style.display='flex';
+  setTimeout(function(){id(which==='leader'?'lg-name':'mg-name').focus();},100);
+}
+
+function submitGate(which){
+  var pin   = id(which==='leader'?'lg-pin':'mg-pin').value.trim();
+  var name  = id(which==='leader'?'lg-name':'mg-name').value.trim();
+  var correct = which==='leader' ? String(WL.LEADER_PIN) : String(WL.MEMBER_PIN);
+  var errEl = id(which==='leader'?'lg-err':'mg-err');
+
+  if(pin!==correct){
+    errEl.style.display='block';
+    id(which==='leader'?'lg-pin':'mg-pin').value='';
+    id(which==='leader'?'lg-pin':'mg-pin').focus();
+    return;
+  }
+  errEl.style.display='none';
+  id(which+'-gate').style.display='none';
+  userName=name||(which==='leader'?'Leader':'Member');
+  mode=which;
+  launchApp();
+}
+
+// === APP LAUNCH ===
+function launchApp(){
+  initSB();
+  id('app').style.display='flex';
+  id('mode-pill').textContent=mode==='leader'?'LEADER':'MEMBER';
+  id('mode-pill').className='mode-pill '+(mode==='leader'?'pill-leader':'pill-member');
+  id('leader-tabs').style.display=mode==='leader'?'flex':'none';
+  id('member-tabs').style.display=mode==='member'?'flex':'none';
+
+  if(mode==='leader'){
+    id('leader-name').value=userName;
+    switchTab('post',document.querySelector('#leader-tabs .tab-btn'));
+    id('tab-post').classList.add('active');
+    id('tab-feed').classList.remove('active');
+  } else {
+    switchTab('feed',document.querySelector('#member-tabs .tab-btn'));
+    id('tab-post').classList.remove('active');
+    id('tab-feed').classList.add('active');
+  }
+
+  loadFeed();
+  subscribeRealtime();
+  if(mode==='member') initPush();
+}
+
+// === POST A MESSAGE ===
+async function postMessage(){
+  var btn=id('post-btn');btn.disabled=true;
+  var from=mode==='leader'?(id('leader-name').value.trim()||'Leader'):userName;
+  var payload={type:currentType,from:from,postedAt:fmtDate(new Date())};
+
+  if(currentType==='scripture'){
+    if(useCustom){
+      var ref=id('cust-ref').value.trim(),text=id('cust-text').value.trim();
+      if(!text){toast('Enter verse text');btn.disabled=false;return;}
+      payload.verse={ref:ref,text:text,trans:'Custom'};
+    } else {
+      var ref=id('verse-sel').value,text=VERSES[currentTrans][ref];
+      payload.verse={ref:ref,text:text,trans:currentTrans};
+    }
+    var note=id('scripture-note').value.trim();
+    if(note)payload.note=note;
+  } else if(currentType==='discussion'){
+    var t=id('disc-text').value.trim();if(!t){toast('Enter a question');btn.disabled=false;return;}
+    payload.body=t;
+  } else if(currentType==='prayer'){
+    var t=id('pray-text').value.trim();if(!t){toast('Enter prayer text');btn.disabled=false;return;}
+    payload.body=t;
+  } else if(currentType==='announce'){
+    var t=id('ann-text').value.trim();if(!t){toast('Enter announcement text');btn.disabled=false;return;}
+    payload.title=id('ann-title').value.trim();payload.body=t;
+  }
+
+  // Encrypt and save to Supabase
+  var saved=false;
+  try{
+    if(sbClient){
+      var ciphertext=await enc(payload);
+      var res=await sbClient.from('wp_messages').insert({
+        tenant: tenantId(),
+        payload: ciphertext
+      }).select('id,created_at').single();
+      if(res.data){
+        payload._id=res.data.id;
+        payload._at=res.data.created_at;
+        saved=true;
+      }
+    }
+  }catch(e){console.warn('Save failed:',e);}
+
+  payload._new=false;
+  allPosts.unshift(payload);
+  renderFeed();
+  id('stat-posts').textContent=allPosts.length;
+  var pct=allPosts.length/500;
+  var sc=id('stat-posts');
+  sc.style.color=pct>=1?'#ef4444':pct>=.8?'#f59e0b':'var(--gold)';
+  var lbl=id('posts-lbl');if(lbl)lbl.textContent=allPosts.length;
+
+  // Clear inputs
+  id('scripture-note').value='';
+  id('disc-text').value='';
+  id('pray-text').value='';
+  id('ann-text').value='';
+  id('ann-title').value='';
+
+  var ok=id('post-ok');ok.style.display='inline';
+  setTimeout(function(){ok.style.display='none';},2000);
+  toast(saved?'🔒 Posted & encrypted':'🔒 Posted (Supabase not connected — configure to persist)');
+  btn.disabled=false;
+}
+
+// === LOAD FEED ===
+async function loadFeed(){
+  id('feed-loading').style.display='block';
+  id('feed-empty').style.display='none';
+  id('feed-list').innerHTML='';
+  allPosts=[];
+
+  if(!sbClient){
+    id('feed-loading').style.display='none';
+    id('feed-empty').style.display='block';
+    return;
+  }
+
+  try{
+    var res=await sbClient.from('wp_messages')
+      .select('id,payload,created_at')
+      .eq('tenant',tenantId())
+      .order('created_at',{ascending:false})
+      .limit(500);
+
+    if(res.error)throw res.error;
+
+    // Decrypt all rows
+    var rows=res.data||[];
+    var decrypted=await Promise.all(rows.map(async function(row){
+      var obj=await dec(row.payload);
+      if(obj){obj._id=row.id;obj._at=row.created_at;obj._new=false;}
+      return obj;
+    }));
+    allPosts=decrypted.filter(Boolean);
+  }catch(e){
+    console.warn('Load failed:',e);
+  }
+
+  id('feed-loading').style.display='none';
+  renderFeed();
+  id('stat-posts').textContent=allPosts.length;
+  var pct=allPosts.length/500;
+  var sc=id('stat-posts');
+  sc.style.color=pct>=1?'#ef4444':pct>=.8?'#f59e0b':'var(--gold)';
+  var lbl=id('posts-lbl');if(lbl)lbl.textContent=allPosts.length;
+}
+
+// === RENDER FEED ===
+function renderFeed(){
+  var list=id('feed-list');
+  if(allPosts.length===0){
+    id('feed-empty').style.display='block';
+    list.innerHTML='';
+    return;
+  }
+  id('feed-empty').style.display='none';
+
+  // Track last-seen timestamp so we can mark new items
+  var lastVisit=parseInt(localStorage.getItem('wp_last_'+tenantId())||'0');
+  var now=Date.now();
+
+  list.innerHTML='';
+  allPosts.forEach(function(p){
+    var postTime=p._at?new Date(p._at).getTime():0;
+    var isNew=postTime>lastVisit&&lastVisit>0;
+    var d=document.createElement('div');
+    d.className='msg '+p.type;
+    d.innerHTML=msgHTML(p,isNew);
+    list.appendChild(d);
+  });
+
+  // Update last-seen
+  localStorage.setItem('wp_last_'+tenantId(),now);
+}
+
+// === MESSAGE HTML ===
+var CFG={
+  scripture: {label:'📖 Scripture', cls:'tb-scripture'},
+  discussion:{label:'💬 Discussion',cls:'tb-discussion'},
+  prayer:    {label:'🙏 Prayer',    cls:'tb-prayer'},
+  announce:  {label:'📢 Announce', cls:'tb-announce'}
+};
+
+function msgHTML(p,isNew){
+  var c=CFG[p.type]||{label:p.type,cls:'tb-scripture'};
+  var date=p._at?fmtDate(new Date(p._at)):(p.postedAt||'');
+  var h='<div class="msg-header">'
+    +'<span class="type-badge '+c.cls+'">'+c.label+'</span>'
+    +(isNew?'<span class="new-badge">NEW</span>':'')
+    +'<span class="msg-from">'+(p.from||'Leader')+'</span>'
+    +'<span class="msg-date">'+date+'</span>'
+    +'<span class="msg-enc">🔒</span>'
+    +'</div>';
+
+  var b='';
+  if(p.type==='scripture'&&p.verse){
+    b='<div class="msg-verse">\u201C'+p.verse.text+'\u201D</div>'
+     +'<div class="msg-ref">\u2014 '+p.verse.ref+' <span style="color:var(--muted);font-weight:400;">('+p.verse.trans+')</span></div>'
+     +(p.note?'<div class="msg-body" style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);">'+p.note+'</div>':'');
+  } else {
+    if(p.title)b+='<div style="font-weight:700;font-size:.95rem;margin-bottom:6px;">'+p.title+'</div>';
+    if(p.body) b+='<div class="msg-body">'+p.body+'</div>';
+  }
+
+  var actions='';
+  if(mode==='leader'&&p._id){
+    actions='<div class="msg-actions"><button class="btn-danger" onclick="deletePost(\''+p._id+'\')">🗑 Delete</button></div>';
+  }
+
+  return h+b+actions;
+}
+
+// === DELETE ===
+async function deletePost(pid){
+  if(!confirm('Delete this post?'))return;
+  try{
+    if(sbClient)await sbClient.from('wp_messages').delete().eq('id',pid);
+  }catch(e){}
+  allPosts=allPosts.filter(function(p){return p._id!==pid;});
+  renderFeed();
+  id('stat-posts').textContent=allPosts.length;
+  var pct=allPosts.length/500;
+  var sc=id('stat-posts');
+  sc.style.color=pct>=1?'#ef4444':pct>=.8?'#f59e0b':'var(--gold)';
+  var lbl=id('posts-lbl');if(lbl)lbl.textContent=allPosts.length;
+  toast('Post deleted');
+}
+
+async function confirmDeleteAll(){
+  if(!confirm('Delete ALL posts for this group? This cannot be undone.'))return;
+  try{
+    if(sbClient)await sbClient.from('wp_messages').delete().eq('tenant',tenantId());
+  }catch(e){}
+  allPosts=[];renderFeed();
+  id('stat-posts').textContent=0;
+  toast('All posts deleted');
+}
+
+// === VERSES ===
+var VERSES={
+  KJV:{
+    'Proverbs 27:17':'Iron sharpeneth iron; so a man sharpeneth the countenance of his friend.',
+    'James 1:19':'Let every man be swift to hear, slow to speak, slow to wrath.',
+    'Psalm 23:1':'The LORD is my shepherd; I shall not want.',
+    'John 3:16':'For God so loved the world, that he gave his only begotten Son, that whosoever believeth in him should not perish, but have everlasting life.',
+    'Romans 8:28':'All things work together for good to them that love God.',
+    'Philippians 4:13':'I can do all things through Christ which strengtheneth me.',
+    'Isaiah 40:31':'They that wait upon the LORD shall renew their strength.',
+    'Proverbs 31:25':'Strength and honour are her clothing; and she shall rejoice in time to come.',
+    'Matthew 5:9':'Blessed are the peacemakers: for they shall be called the children of God.',
+    'Hebrews 10:24':'Let us consider one another to provoke unto love and to good works.',
+    'Psalm 119:105':'Thy word is a lamp unto my feet, and a light unto my path.',
+    '2 Timothy 3:16':'All scripture is given by inspiration of God, and is profitable for doctrine.'
+  },
+  NIV:{
+    'Proverbs 27:17':'As iron sharpens iron, so one person sharpens another.',
+    'James 1:19':'Everyone should be quick to listen, slow to speak and slow to become angry.',
+    'Psalm 23:1':'The LORD is my shepherd, I lack nothing.',
+    'John 3:16':'For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish but have eternal life.',
+    'Romans 8:28':'In all things God works for the good of those who love him.',
+    'Philippians 4:13':'I can do all this through him who gives me strength.',
+    'Isaiah 40:31':'Those who hope in the LORD will renew their strength. They will soar on wings like eagles.',
+    'Proverbs 31:25':'She is clothed with strength and dignity; she can laugh at the days to come.',
+    'Matthew 5:9':'Blessed are the peacemakers, for they will be called children of God.',
+    'Hebrews 10:24':'Let us consider how we may spur one another on toward love and good deeds.',
+    'Psalm 119:105':'Your word is a lamp for my feet, a light on my path.',
+    '2 Timothy 3:16':'All Scripture is God-breathed and is useful for teaching, rebuking, correcting and training in righteousness.'
+  },
+  ESV:{
+    'Proverbs 27:17':'Iron sharpens iron, and one man sharpens another.',
+    'James 1:19':'Let every person be quick to hear, slow to speak, slow to anger.',
+    'Psalm 23:1':'The LORD is my shepherd; I shall not want.',
+    'John 3:16':'God so loved the world, that he gave his only Son, that whoever believes in him should not perish but have eternal life.',
+    'Romans 8:28':'For those who love God all things work together for good.',
+    'Philippians 4:13':'I can do all things through him who strengthens me.',
+    'Isaiah 40:31':'They who wait for the LORD shall renew their strength; they shall mount up with wings like eagles.',
+    'Proverbs 31:25':'Strength and dignity are her clothing, and she laughs at the time to come.',
+    'Matthew 5:9':'Blessed are the peacemakers, for they shall be called sons of God.',
+    'Hebrews 10:24':'Let us consider how to stir up one another to love and good works.',
+    'Psalm 119:105':'Your word is a lamp to my feet and a light to my path.',
+    '2 Timothy 3:16':'All Scripture is breathed out by God and profitable for teaching, for reproof, for correction, and for training in righteousness.'
+  },
+  NKJV:{
+    'Proverbs 27:17':'As iron sharpens iron, so a man sharpens the countenance of his friend.',
+    'James 1:19':'Let every man be swift to hear, slow to speak, slow to wrath.',
+    'Psalm 23:1':'The LORD is my shepherd; I shall not want.',
+    'John 3:16':'God so loved the world that He gave His only begotten Son, that whoever believes in Him should not perish but have everlasting life.',
+    'Romans 8:28':'All things work together for good to those who love God.',
+    'Philippians 4:13':'I can do all things through Christ who strengthens me.',
+    'Isaiah 40:31':'Those who wait on the LORD shall renew their strength; they shall mount up with wings like eagles.',
+    'Proverbs 31:25':'Strength and honor are her clothing; she shall rejoice in time to come.',
+    'Matthew 5:9':'Blessed are the peacemakers, for they shall be called sons of God.',
+    'Hebrews 10:24':'Let us consider one another in order to stir up love and good works.',
+    'Psalm 119:105':'Your word is a lamp to my feet and a light to my path.',
+    '2 Timothy 3:16':'All Scripture is given by inspiration of God, and is profitable for doctrine, for reproof, for correction, for instruction in righteousness.'
+  }
+};
+var REFS=Object.keys(VERSES.NIV);
+
+function buildVerseUI(){
+  var tr=id('trans-row');tr.innerHTML='';
+  ['KJV','NIV','ESV','NKJV'].forEach(function(t){
+    var b=document.createElement('button');
+    b.className='trans-btn'+(t===currentTrans?' active':'');
+    b.textContent=t;
+    b.onclick=function(){
+      currentTrans=t;
+      document.querySelectorAll('.trans-btn').forEach(function(x){x.classList.remove('active');});
+      b.classList.add('active');buildVerseSelect();updatePreview();
+    };
+    tr.appendChild(b);
+  });
+  buildVerseSelect();updatePreview();
+}
+function buildVerseSelect(){
+  var sel=id('verse-sel');sel.innerHTML='';
+  REFS.forEach(function(r){var o=document.createElement('option');o.value=r;o.textContent=r;sel.appendChild(o);});
+}
+function updatePreview(){
+  var ref,text;
+  if(useCustom){ref=id('cust-ref').value.trim();text=id('cust-text').value.trim();}
+  else{ref=id('verse-sel').value;text=VERSES[currentTrans][ref]||'';}
+  var pv=id('verse-preview');
+  if(text){pv.style.display='block';id('preview-text').textContent='\u201C'+text+'\u201D';id('preview-ref').textContent='\u2014 '+ref+(useCustom?'':' ('+currentTrans+')');}
+  else pv.style.display='none';
+}
+function toggleCustom(){
+  useCustom=id('custom-chk').checked;
+  id('preset-wrap').style.display=useCustom?'none':'block';
+  id('custom-wrap').style.display=useCustom?'block':'none';
+  updatePreview();
+}
+
+
+// === WEB PUSH ===
+var swReg = null;
+
+async function initPush(){
+  if(!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+  try{
+    swReg = await navigator.serviceWorker.register('./sw.js');
+    console.log('SW registered');
+  }catch(e){ console.warn('SW registration failed:',e); }
+}
+
+function urlB64ToUint8Array(base64String){
+  var padding='='.repeat((4-base64String.length%4)%4);
+  var base64=(base64String+padding).replace(/-/g,'+').replace(/_/g,'/');
+  var raw=atob(base64);
+  var arr=new Uint8Array(raw.length);
+  for(var i=0;i<raw.length;i++) arr[i]=raw.charCodeAt(i);
+  return arr;
+}
+
+async function handleNotifBtn(){
+  var btn=id('notif-btn');
+  var status=id('notif-status');
+
+  // Check if already subscribed
+  if(swReg){
+    var existing=await swReg.pushManager.getSubscription();
+    if(existing){
+      // Already subscribed — offer to unsubscribe
+      if(confirm('You already have notifications enabled. Disable them?')){
+        await existing.unsubscribe();
+        if(sbClient) await sbClient.from('wp_subscriptions').delete()
+          .eq('tenant',tenantId())
+          .eq('member_name',userName);
+        updateNotifUI('default');
+        toast('Notifications disabled');
+      }
+      return;
+    }
+  }
+
+  // iOS check — must be installed to Home Screen
+  var isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)&&!window.MSStream;
+  var isStandalone=window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone;
+  if(isIOS&&!isStandalone){
+    id('notif-ios-hint').style.display='block';
+    return;
+  }
+
+  if(!swReg){
+    toast('Service worker not available. Make sure sw.js is deployed.');
+    return;
+  }
+
+  // Request permission
+  var permission=await Notification.requestPermission();
+  if(permission!=='granted'){
+    updateNotifUI('denied');
+    toast('Notifications blocked. Check your browser settings.');
+    return;
+  }
+
+  // Subscribe
+  try{
+    btn.textContent='Subscribing…';btn.disabled=true;
+    var sub=await swReg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlB64ToUint8Array(WL.VAPID_PUBLIC_KEY)
+    });
+
+    // Save subscription to Supabase
+    if(sbClient){
+      await sbClient.from('wp_subscriptions').upsert({
+        tenant:      tenantId(),
+        member_name: userName,
+        subscription: JSON.stringify(sub.toJSON()),
+        updated_at:  new Date().toISOString()
+      },{onConflict:'tenant,member_name'});
+    }
+
+    updateNotifUI('granted');
+    toast('🔔 Notifications enabled!');
+  }catch(e){
+    console.error('Subscribe failed:',e);
+    btn.textContent='Enable Notifications';btn.disabled=false;
+    toast('Could not subscribe: '+e.message);
+  }
+}
+
+function updateNotifUI(state){
+  var btn=id('notif-btn');
+  var icon=id('notif-icon');
+  var title=id('notif-title');
+  var desc=id('notif-desc');
+  var status=id('notif-status');
+  btn.disabled=false;
+  if(state==='granted'){
+    icon.textContent='✅';
+    title.textContent='Notifications On';
+    desc.textContent='You'll get a notification on your phone whenever your leader posts something new.';
+    btn.textContent='Disable Notifications';
+    status.textContent='';
+  } else if(state==='denied'){
+    icon.textContent='🚫';
+    title.textContent='Notifications Blocked';
+    desc.textContent='You've blocked notifications for this site. To enable them, go to your browser settings and allow notifications for this page.';
+    btn.style.display='none';
+  } else {
+    icon.textContent='🔔';
+    title.textContent='Get Notified';
+    desc.textContent='Get a notification on your phone whenever your leader posts something new — even when the app is closed.';
+    btn.textContent='Enable Notifications';
+    btn.style.display='inline-flex';
+  }
+}
+
+async function checkExistingSubscription(){
+  if(!swReg) return;
+  try{
+    var existing=await swReg.pushManager.getSubscription();
+    if(existing) updateNotifUI('granted');
+    else if(Notification.permission==='denied') updateNotifUI('denied');
+  }catch(e){}
+}
+
+// === UI ===
+function setType(t,btn){
+  currentType=t;
+  document.querySelectorAll('.type-btn').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');
+  ['scripture','discussion','prayer','announce'].forEach(function(x){id('panel-'+x).style.display=x===t?'block':'none';});
+}
+function switchTab(name,btn){
+  document.querySelectorAll('.section').forEach(function(s){s.classList.remove('active');});
+  var el=id('tab-'+name);if(el)el.classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active');});
+  if(btn)btn.classList.add('active');
+  // Load feed when switching to it
+  if(name==='feed'&&allPosts.length===0)loadFeed();
+  if(name==='notify')checkExistingSubscription();
+}
+function showEncInfo(){id('enc-modal').classList.add('open');}
+function fmtDate(d){return d.toLocaleDateString([],{month:'short',day:'numeric'})+' · '+d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});}
+function id(x){return document.getElementById(x);}
+var _tt;
+function toast(msg){var t=id('toast');t.textContent=msg;t.classList.add('show');clearTimeout(_tt);_tt=setTimeout(function(){t.classList.remove('show');},2800);}
+</script>
+
+<!-- ── SUPABASE SCHEMA (run this in Supabase SQL Editor) ────────────────────
+CREATE TABLE IF NOT EXISTS wp_messages (
+  id          uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  tenant      text NOT NULL,
+  payload     text NOT NULL,
+  created_at  timestamptz DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS wp_messages_tenant_idx ON wp_messages(tenant, created_at DESC);
+ALTER TABLE wp_messages ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "anon read"   ON wp_messages FOR SELECT USING (true);
+CREATE POLICY "anon insert" ON wp_messages FOR INSERT WITH CHECK (true);
+CREATE POLICY "anon delete" ON wp_messages FOR DELETE USING (true);
+──────────────────────────────────────────────────────────────────────────── -->
+
+</body>
+</html>
