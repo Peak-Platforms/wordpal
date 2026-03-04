@@ -14,7 +14,7 @@
 var WL = {
   MINISTRY_NAME:  "WordPal Demo",
   MINISTRY_TAG:   "Live Demo -- Try it out",
-  MINISTRY_ICON:  "&#128214;",
+  MINISTRY_ICON:  "📖",
   ACCENT:         "#C8922A",
   ACCENT2:        "#E8B84B",
   DARK_MODE:      true,
@@ -22,13 +22,13 @@ var WL = {
 
   // Supabase -- shared demo instance
   SUPABASE_URL:   "https://ggvtxauxjkixszvyirsl.supabase.co",
-  SUPABASE_ANON:  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdndnR4YXV4amtpeHN6dnlpcnNsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2NDYyMDcsImV4cCI6MjA4ODIyMjIwN30.XEzPwh7-BYc7FnfU21AvXExQjhd-6UwJ4G8og3dYqaY",
+  SUPABASE_ANON:  "YOUR_ANON_KEY",
 
   // Shared room key for demo
   ROOM_KEY:       "wordpal-demo-2025-live-preview-ok!",
 
   // Demo PINs -- shared openly since this is a public demo
-  LEADER_PIN:     "0000",
+  LEADER_PIN:     "YOUR_PRIVATE_DEMO_PIN",  // Only you know this
   MEMBER_PIN:     "1111",
 
   // Web Push
@@ -669,6 +669,70 @@ async function loadFeed(){
   }
 
   id('feed-loading').style.display='none';
+
+  // If feed is empty, seed with demo posts so prospects always see a full feed
+  if(allPosts.length===0){
+    var now=new Date();
+    var d1=new Date(now-1000*60*60*2);   // 2 hours ago
+    var d2=new Date(now-1000*60*60*26);  // yesterday
+    var d3=new Date(now-1000*60*60*50);  // 2 days ago
+    var d4=new Date(now-1000*60*60*74);  // 3 days ago
+
+    allPosts=[
+      {
+        type:'scripture',
+        from:'Pastor Mike',
+        postedAt:fmtDate(d1),
+        _at:d1.toISOString(),
+        _new:true,
+        verse:{
+          ref:'Proverbs 27:17',
+          text:'As iron sharpens iron, so one person sharpens another.',
+          trans:'NIV'
+        },
+        note:'This week we explore what it means to truly invest in each other. Come ready to share one person who has sharpened you.'
+      },
+      {
+        type:'discussion',
+        from:'Pastor Mike',
+        postedAt:fmtDate(d1),
+        _at:new Date(d1.getTime()+1000*60*3).toISOString(),
+        _new:true,
+        body:'Who in your life is sharpening you right now? And are you letting them? Come ready to share Thursday.'
+      },
+      {
+        type:'prayer',
+        from:'Pastor Mike',
+        postedAt:fmtDate(d2),
+        _at:d2.toISOString(),
+        _new:false,
+        body:'Pray for the Johnson family this week — James had surgery Monday and is recovering at home. They would appreciate meals if anyone is able.'
+      },
+      {
+        type:'announce',
+        from:'Pastor Mike',
+        postedAt:fmtDate(d3),
+        _at:d3.toISOString(),
+        _new:false,
+        title:"This Week's Meeting",
+        body:'Thursday 7PM — location moved to the Hendersons\' house. 412 Maple Drive. Please park on the street.'
+      },
+      {
+        type:'scripture',
+        from:'Pastor Mike',
+        postedAt:fmtDate(d4),
+        _at:d4.toISOString(),
+        _new:false,
+        verse:{
+          ref:'Hebrews 10:24',
+          text:'And let us consider how we may spur one another on toward love and good deeds.',
+          trans:'NIV'
+        },
+        note:'Last week\' theme — we are not meant to do this alone.'
+      }
+    ];
+  }
+
   renderFeed();
   id('stat-posts').textContent=allPosts.length;
   var pct=allPosts.length/500;
