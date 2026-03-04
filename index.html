@@ -250,7 +250,7 @@ footer{background:var(--navy2);border-top:1px solid rgba(255,255,255,.06);paddin
 .peak-tag{font-size:.72rem;color:rgba(250,247,242,.2);margin-top:6px;}
 .peak-tag a{color:rgba(200,146,42,.4);text-decoration:none;}
 .peak-tag a:hover{color:var(--gold);}
-@media(max-width:800px){.footer-top{grid-template-columns:1fr 1fr;}}
+@media(max-width:800px){.footer-top{grid-template-columns:1fr 1fr;}.showcase-grid{grid-template-columns:1fr!important;}}
 @media(max-width:500px){.footer-top{grid-template-columns:1fr;}}
 
 /* ── ANIMATIONS ── */
@@ -271,7 +271,7 @@ footer{background:var(--navy2);border-top:1px solid rgba(255,255,255,.06);paddin
 <body>
 
 <!-- NAV -->
-<div style="background:var(--navy);color:rgba(250,247,242,.6);text-align:center;padding:7px;font-size:.78rem;font-weight:600;">Already a member? <a href="https://app.wordpal.fun" style="color:var(--gold);text-decoration:none;">Open your feed →</a></div>
+<div style="background:var(--navy);color:rgba(250,247,242,.6);text-align:center;padding:7px;font-size:.78rem;font-weight:600;">Already a member? <a href="https://wordpal.fun/demo" style="color:var(--gold);text-decoration:none;">Open your feed →</a></div>
 <nav id="nav">
   <a href="#" class="nav-logo">
     <span class="nav-logo-text">Word<span>Pal</span></span>
@@ -279,6 +279,7 @@ footer{background:var(--navy2);border-top:1px solid rgba(255,255,255,.06);paddin
   </a>
   <div class="nav-links">
     <a href="#how">How It Works</a>
+    <a href="#demo">See the App</a>
     <a href="#features">Features</a>
     <a href="#pricing">Pricing</a>
     <a href="#faq">FAQ</a>
@@ -304,7 +305,7 @@ footer{background:var(--navy2);border-top:1px solid rgba(255,255,255,.06);paddin
   <div class="hero-cta-row fade-up delay-3">
     <a href="/cdn-cgi/l/email-protection#4b202e3d22250b3b2e2a203b272a3f2d2439263865282426" class="btn-primary">✦ Request a Demo</a>
     <a href="#how" class="btn-secondary">See How It Works →</a>
-    <a href="https://app.wordpal.fun" class="btn-secondary" target="_blank" style="border-color:var(--gold);color:var(--gold);">Live Demo →</a>
+    <a href="https://wordpal.fun/demo" class="btn-secondary" target="_blank" style="border-color:var(--gold);color:var(--gold);">Live Demo →</a>
   </div>
 
   <!-- MOCKUP -->
@@ -407,6 +408,135 @@ footer{background:var(--navy2);border-top:1px solid rgba(255,255,255,.06);paddin
       <div class="step-title">Members read anytime</div>
       <div class="step-desc">Open Tuesday morning, read Monday's post. Open Friday, see what's new. Every post stays in the feed until the leader removes it.</div>
     </div>
+  </div>
+</section>
+
+
+<!-- UI SHOWCASE -->
+<section style="background:var(--cream2);padding:96px 6%;" id="demo">
+  <div class="section-label center">See it in action</div>
+  <div class="section-title center" style="max-width:600px;">
+    Two views.<br><em>One secure channel.</em>
+  </div>
+  <p class="section-sub center" style="margin:14px auto 40px;text-align:center;">
+    The leader posts from their panel. Members read at their own pace. Everything encrypted in between.
+  </p>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:32px;max-width:1000px;margin:0 auto;align-items:start;">
+
+    <!-- LEADER UI -->
+    <div class="reveal">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+        <div style="background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--navy);font-size:.72rem;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:4px 12px;border-radius:100px;">Leader Panel</div>
+        <div style="font-size:.82rem;color:var(--muted);">Pastor / Group Leader</div>
+      </div>
+      <div style="background:var(--navy2);border-radius:16px;overflow:hidden;box-shadow:0 16px 48px rgba(26,46,74,.2);">
+        <!-- topbar -->
+        <div style="background:#0F1E30;border-bottom:1px solid rgba(255,255,255,.06);padding:10px 16px;display:flex;align-items:center;justify-content:space-between;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;background:linear-gradient(135deg,#C8922A,#E8B84B);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">WordPal</span>
+            <span style="font-size:.6rem;font-weight:700;letter-spacing:1px;background:rgba(200,146,42,.15);color:#C8922A;padding:2px 7px;border-radius:100px;">LEADER</span>
+          </div>
+          <span style="font-size:.68rem;font-weight:600;color:#22c55e;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);padding:3px 10px;border-radius:100px;">🔒 E2E</span>
+        </div>
+        <!-- tabs -->
+        <div style="background:#0F1E30;border-bottom:1px solid rgba(255,255,255,.06);display:flex;padding:0 12px;gap:4px;">
+          <div style="font-size:.75rem;font-weight:700;color:#C8922A;padding:10px 12px;border-bottom:2px solid #C8922A;">✏️ Post</div>
+          <div style="font-size:.75rem;font-weight:600;color:#7D8590;padding:10px 12px;">📋 All Posts</div>
+          <div style="font-size:.75rem;font-weight:600;color:#7D8590;padding:10px 12px;">⚙️ Manage</div>
+        </div>
+        <!-- content -->
+        <div style="padding:16px;">
+          <!-- type selector -->
+          <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;">
+            <div style="background:rgba(200,146,42,.1);border:1px solid #C8922A;border-radius:7px;color:#C8922A;font-size:.72rem;font-weight:700;padding:5px 10px;">📖 Scripture</div>
+            <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:7px;color:#7D8590;font-size:.72rem;font-weight:600;padding:5px 10px;">💬 Discussion</div>
+            <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:7px;color:#7D8590;font-size:.72rem;font-weight:600;padding:5px 10px;">🙏 Prayer</div>
+            <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:7px;color:#7D8590;font-size:.72rem;font-weight:600;padding:5px 10px;">📢 Announce</div>
+          </div>
+          <!-- translation -->
+          <div style="display:flex;gap:5px;margin-bottom:10px;">
+            <div style="background:#C8922A;border-radius:6px;color:#0D1117;font-size:.68rem;font-weight:800;padding:4px 9px;">NIV</div>
+            <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:6px;color:#7D8590;font-size:.68rem;font-weight:700;padding:4px 9px;">KJV</div>
+            <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:6px;color:#7D8590;font-size:.68rem;font-weight:700;padding:4px 9px;">ESV</div>
+            <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:6px;color:#7D8590;font-size:.68rem;font-weight:700;padding:4px 9px;">NKJV</div>
+          </div>
+          <!-- verse preview -->
+          <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-left:3px solid #C8922A;border-radius:8px;padding:12px 14px;margin-bottom:10px;">
+            <div style="font-family:'Playfair Display',serif;font-size:.88rem;font-style:italic;color:#E6EDF3;line-height:1.7;">"As iron sharpens iron, so one person sharpens another."</div>
+            <div style="font-size:.72rem;font-weight:700;color:#C8922A;margin-top:6px;">— Proverbs 27:17 (NIV)</div>
+          </div>
+          <!-- note field -->
+          <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:7px;padding:8px 12px;font-size:.75rem;color:#7D8590;margin-bottom:12px;">Add a note or reflection (optional)…</div>
+          <!-- post button -->
+          <div style="background:linear-gradient(135deg,#C8922A,#E8B84B);color:#0D1117;font-size:.82rem;font-weight:700;padding:9px 16px;border-radius:8px;display:inline-flex;align-items:center;gap:6px;">🔒 Post Encrypted</div>
+        </div>
+      </div>
+      <p style="text-align:center;font-size:.78rem;color:var(--muted);margin-top:12px;">Leader posts scripture, questions, prayer & announcements</p>
+    </div>
+
+    <!-- MEMBER UI -->
+    <div class="reveal" style="transition-delay:.15s;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+        <div style="background:linear-gradient(135deg,#5B8BF5,#8B5CF6);color:#fff;font-size:.72rem;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:4px 12px;border-radius:100px;">Member Feed</div>
+        <div style="font-size:.82rem;color:var(--muted);">Group Member</div>
+      </div>
+      <div style="background:var(--navy2);border-radius:16px;overflow:hidden;box-shadow:0 16px 48px rgba(26,46,74,.2);">
+        <!-- topbar -->
+        <div style="background:#0F1E30;border-bottom:1px solid rgba(255,255,255,.06);padding:10px 16px;display:flex;align-items:center;justify-content:space-between;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;background:linear-gradient(135deg,#C8922A,#E8B84B);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">WordPal</span>
+            <span style="font-size:.6rem;font-weight:700;letter-spacing:1px;background:rgba(91,139,245,.15);color:#5B8BF5;padding:2px 7px;border-radius:100px;">MEMBER</span>
+          </div>
+          <span style="font-size:.68rem;font-weight:600;color:#22c55e;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);padding:3px 10px;border-radius:100px;">🔒 E2E</span>
+        </div>
+        <!-- tabs -->
+        <div style="background:#0F1E30;border-bottom:1px solid rgba(255,255,255,.06);display:flex;padding:0 12px;">
+          <div style="font-size:.75rem;font-weight:700;color:#C8922A;padding:10px 12px;border-bottom:2px solid #C8922A;">📖 My Feed</div>
+          <div style="font-size:.75rem;font-weight:600;color:#7D8590;padding:10px 12px;">🔔 Notifications</div>
+        </div>
+        <!-- feed -->
+        <div style="padding:14px;display:flex;flex-direction:column;gap:10px;">
+
+          <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-left:3px solid #C8922A;border-radius:10px;padding:12px 14px;">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;flex-wrap:wrap;">
+              <span style="font-size:.62rem;font-weight:700;background:rgba(200,146,42,.15);color:#C8922A;padding:2px 7px;border-radius:100px;">📖 Scripture</span>
+              <span style="font-size:.58rem;background:rgba(34,197,94,.12);color:#22c55e;border:1px solid rgba(34,197,94,.25);border-radius:3px;padding:1px 5px;font-weight:700;">NEW</span>
+              <span style="font-size:.7rem;font-weight:700;color:#E6EDF3;">Pastor Mike</span>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:.62rem;color:#7D8590;margin-left:auto;">Today · 6:32 AM</span>
+            </div>
+            <div style="font-family:'Playfair Display',serif;font-size:.85rem;font-style:italic;color:#E6EDF3;line-height:1.65;">"As iron sharpens iron, so one person sharpens another."</div>
+            <div style="font-size:.68rem;font-weight:700;color:#C8922A;margin-top:5px;">— Proverbs 27:17 (NIV)</div>
+          </div>
+
+          <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-left:3px solid #5B8BF5;border-radius:10px;padding:12px 14px;">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;flex-wrap:wrap;">
+              <span style="font-size:.62rem;font-weight:700;background:rgba(91,139,245,.15);color:#5B8BF5;padding:2px 7px;border-radius:100px;">💬 Discussion</span>
+              <span style="font-size:.58rem;background:rgba(34,197,94,.12);color:#22c55e;border:1px solid rgba(34,197,94,.25);border-radius:3px;padding:1px 5px;font-weight:700;">NEW</span>
+              <span style="font-size:.7rem;font-weight:700;color:#E6EDF3;">Pastor Mike</span>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:.62rem;color:#7D8590;margin-left:auto;">Today · 6:35 AM</span>
+            </div>
+            <div style="font-size:.82rem;color:#E6EDF3;line-height:1.6;">Who in your life is sharpening you right now? Come ready to share Thursday.</div>
+          </div>
+
+          <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-left:3px solid #7BAD85;border-radius:10px;padding:12px 14px;">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;flex-wrap:wrap;">
+              <span style="font-size:.62rem;font-weight:700;background:rgba(123,173,133,.15);color:#7BAD85;padding:2px 7px;border-radius:100px;">🙏 Prayer</span>
+              <span style="font-size:.7rem;font-weight:700;color:#E6EDF3;">Pastor Mike</span>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:.62rem;color:#7D8590;margin-left:auto;">Mon · 7:10 AM</span>
+            </div>
+            <div style="font-size:.82rem;color:#E6EDF3;line-height:1.6;">Pray for the Johnson family — James had surgery Monday and is recovering at home.</div>
+          </div>
+
+        </div>
+      </div>
+      <p style="text-align:center;font-size:.78rem;color:var(--muted);margin-top:12px;">Members read everything at their own pace — anytime, any device</p>
+    </div>
+
+  </div>
+
+  <div style="text-align:center;margin-top:48px;">
+    <a href="https://wordpal.fun/demo" target="_blank" class="btn-primary">Try the Live Demo →</a>
   </div>
 </section>
 
@@ -717,7 +847,7 @@ footer{background:var(--navy2);border-top:1px solid rgba(255,255,255,.06);paddin
   <p>Request a demo and we'll take it from there.</p>
   <div class="cta-row">
     <a href="/cdn-cgi/l/email-protection#abc0ceddc2c5ebdbcecac0dbc7cadfcdc4d9c6d885c8c4c694d8dec9c1cec8df96fcc4d9cffbcac78befcec6c48bf9cedadeced8df" class="btn-primary">✦ Request a Demo</a>
-    <a href="https://app.wordpal.fun" class="btn-secondary" target="_blank" style="color:rgba(250,247,242,.7);border-color:rgba(255,255,255,.2);">See Live Demo →</a>
+    <a href="https://wordpal.fun/demo" class="btn-secondary" target="_blank" style="color:rgba(250,247,242,.7);border-color:rgba(255,255,255,.2);">See Live Demo →</a>
   </div>
 </section>
 
