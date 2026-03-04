@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>WordPal — Encrypted Communications for Faith Communities</title>
+<meta name="description" content="Replace email for your Bible study, ministry group, or church staff. WordPal delivers scripture, discussion questions, prayer requests and announcements — encrypted end-to-end, readable anytime."/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --cream:   #FAF7F2;
+  --cream2:  #F3EDE0;
+  --parch:   #EDE3D0;
+  --navy:    #1A2E4A;
+  --navy2:   #0F1E30;
+  --navy3:   #253A52;
+  --gold:    #C8922A;
+  --gold2:   #E8B84B;
+  --gold3:   #F5D080;
+  --text:    #2C2416;
+  --muted:   #7A6E5E;
+  --border:  #DDD4C0;
+  --safe:    #3A7D5A;
+  --white:   #FFFFFF;
+  --radius:  14px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);overflow-x:hidden;}
+
+/* ── TEXTURE OVERLAY ── */
+body::after{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");opacity:.025;pointer-events:none;z-index:9999;}
+
+/* ── NAV ── */
+nav{position:sticky;top:0;z-index:100;background:rgba(250,247,242,.96);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:0 6%;height:68px;display:flex;align-items:center;justify-content:space-between;}
+.nav-logo{display:flex;align-items:center;gap:12px;text-decoration:none;}
+.nav-logo-text{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:700;color:var(--navy);}
+.nav-logo-text span{color:var(--gold);}
+.nav-logo-tag{font-size:.65rem;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--muted);border:1px solid var(--border);border-radius:100px;padding:2px 8px;}
+.nav-links{display:flex;align-items:center;gap:28px;}
+.nav-links a{text-decoration:none;color:var(--muted);font-weight:600;font-size:.88rem;transition:color .2s;}
+.nav-links a:hover{color:var(--navy);}
+.btn-nav{background:var(--navy);color:var(--cream)!important;border-radius:8px;padding:9px 22px;font-weight:700!important;font-size:.85rem!important;transition:all .2s!important;border:none;}
+.btn-nav:hover{background:var(--navy2)!important;transform:translateY(-1px);box-shadow:0 4px 14px rgba(26,46,74,.25)!important;}
+@media(max-width:700px){.nav-links{display:none;}}
+
+/* ── HERO ── */
+.hero{min-height:94vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:80px 24px 60px;position:relative;overflow:hidden;}
+.hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse at 50% -10%,rgba(200,146,42,.12),transparent 65%),radial-gradient(ellipse at 20% 100%,rgba(26,46,74,.08),transparent 50%);}
+.hero-ornament{position:absolute;top:60px;left:50%;transform:translateX(-50%);width:1px;height:60px;background:linear-gradient(to bottom,transparent,var(--gold));opacity:.4;}
+
+.enc-pill{display:inline-flex;align-items:center;gap:8px;background:rgba(58,125,90,.1);border:1px solid rgba(58,125,90,.3);border-radius:100px;padding:6px 16px;font-size:.78rem;font-weight:700;color:var(--safe);margin-bottom:28px;letter-spacing:.5px;}
+
+.hero h1{font-family:'Playfair Display',serif;font-size:clamp(2.8rem,6vw,5.2rem);font-weight:900;line-height:1.1;color:var(--navy);margin-bottom:8px;max-width:820px;}
+.hero h1 em{font-style:italic;color:var(--gold);}
+.hero-sub{font-size:clamp(1rem,2vw,1.2rem);color:var(--muted);max-width:560px;line-height:1.75;margin:20px auto 36px;font-weight:400;}
+
+.hero-cta-row{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-bottom:60px;}
+.btn-primary{background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--navy);border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:700;padding:14px 32px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:8px;transition:all .25s;box-shadow:0 4px 20px rgba(200,146,42,.3);}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(200,146,42,.45);}
+.btn-secondary{background:transparent;color:var(--navy);border:2px solid var(--border);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:700;padding:13px 28px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:8px;transition:all .25s;}
+.btn-secondary:hover{border-color:var(--gold);color:var(--gold);transform:translateY(-1px);}
+
+/* HERO MOCKUP */
+.hero-mockup{position:relative;max-width:680px;width:100%;margin:0 auto;}
+.mockup-browser{background:var(--white);border-radius:16px;border:1px solid var(--border);box-shadow:0 24px 80px rgba(26,46,74,.16),0 8px 24px rgba(26,46,74,.08);overflow:hidden;}
+.mockup-bar{background:var(--cream2);border-bottom:1px solid var(--border);padding:10px 16px;display:flex;align-items:center;gap:8px;}
+.mockup-dots{display:flex;gap:5px;}
+.mockup-dot{width:11px;height:11px;border-radius:50%;}
+.mockup-dot:nth-child(1){background:#ff6159;}
+.mockup-dot:nth-child(2){background:#ffbd2e;}
+.mockup-dot:nth-child(3){background:#27c840;}
+.mockup-url{flex:1;background:var(--cream);border:1px solid var(--border);border-radius:6px;padding:4px 12px;font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--muted);text-align:center;}
+.mockup-content{padding:20px;display:flex;flex-direction:column;gap:12px;}
+
+.mock-msg{background:var(--cream);border:1px solid var(--border);border-radius:12px;padding:14px 16px;text-align:left;}
+.mock-msg.scripture{border-left:4px solid var(--gold);}
+.mock-msg.discussion{border-left:4px solid #5B8BF5;}
+.mock-msg.prayer{border-left:4px solid #7BAD85;}
+.mock-msg.announce{border-left:4px solid #D4864A;}
+.mock-header{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.mock-badge{font-size:.65rem;font-weight:700;letter-spacing:.8px;text-transform:uppercase;padding:2px 8px;border-radius:100px;}
+.badge-s{background:rgba(200,146,42,.15);color:var(--gold);}
+.badge-d{background:rgba(91,139,245,.15);color:#5B8BF5;}
+.badge-p{background:rgba(123,173,133,.15);color:#7BAD85;}
+.badge-a{background:rgba(212,134,74,.15);color:#D4864A;}
+.mock-from{font-size:.75rem;font-weight:700;color:var(--navy);}
+.mock-time{font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--muted);margin-left:auto;}
+.mock-new{font-size:.62rem;background:rgba(58,125,90,.12);color:var(--safe);border:1px solid rgba(58,125,90,.25);border-radius:3px;padding:1px 5px;font-weight:700;}
+.mock-verse{font-family:'Playfair Display',serif;font-size:.92rem;font-style:italic;color:var(--text);line-height:1.7;margin-bottom:4px;}
+.mock-ref{font-size:.72rem;font-weight:700;color:var(--gold);}
+.mock-body{font-size:.85rem;color:var(--text);line-height:1.6;}
+.mock-enc{font-size:.62rem;color:var(--safe);font-weight:700;}
+
+/* ── SECTION COMMONS ── */
+section{padding:96px 6%;}
+.section-label{font-size:.75rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:14px;}
+.section-title{font-family:'Playfair Display',serif;font-size:clamp(2rem,4vw,3rem);font-weight:900;color:var(--navy);line-height:1.2;margin-bottom:16px;}
+.section-title em{font-style:italic;color:var(--gold);}
+.section-sub{font-size:1.05rem;color:var(--muted);max-width:580px;line-height:1.75;}
+.center{text-align:center;margin-left:auto;margin-right:auto;}
+
+/* ── HOW IT WORKS ── */
+.how{background:var(--navy2);color:var(--cream);}
+.how .section-title{color:var(--cream);}
+.how .section-sub{color:rgba(250,247,242,.6);max-width:620px;margin:0 auto 60px;}
+.how .section-label{color:var(--gold2);}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:2px;max-width:1000px;margin:0 auto;}
+.step{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);padding:36px 28px;position:relative;transition:background .2s;}
+.step:hover{background:rgba(255,255,255,.07);}
+.step:first-child{border-radius:14px 0 0 14px;}
+.step:last-child{border-radius:0 14px 14px 0;}
+.step-num{font-family:'Playfair Display',serif;font-size:4rem;font-weight:900;color:rgba(200,146,42,.2);line-height:1;margin-bottom:16px;}
+.step-icon{font-size:2rem;margin-bottom:14px;}
+.step-title{font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:700;color:var(--cream);margin-bottom:8px;}
+.step-desc{font-size:.88rem;color:rgba(250,247,242,.55);line-height:1.7;}
+.step-arrow{position:absolute;right:-13px;top:50%;transform:translateY(-50%);width:26px;height:26px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.7rem;color:var(--navy);font-weight:900;z-index:2;}
+@media(max-width:700px){.step:first-child,.step:last-child{border-radius:0;}.step-arrow{display:none;}.steps{grid-template-columns:1fr;}}
+
+/* ── FEATURES ── */
+.features{background:var(--cream);}
+.features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px;max-width:1060px;margin:60px auto 0;}
+.feat-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:28px;transition:all .25s;position:relative;overflow:hidden;}
+.feat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+.feat-card.fc-gold::before{background:linear-gradient(90deg,var(--gold),var(--gold2));}
+.feat-card.fc-blue::before{background:linear-gradient(90deg,#5B8BF5,#8B5CF6);}
+.feat-card.fc-green::before{background:linear-gradient(90deg,#3A7D5A,#5BAD7A);}
+.feat-card.fc-amber::before{background:linear-gradient(90deg,#D4864A,#E8A867);}
+.feat-card:hover{transform:translateY(-4px);box-shadow:0 12px 40px rgba(26,46,74,.1);}
+.feat-icon{font-size:2rem;margin-bottom:16px;}
+.feat-title{font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;color:var(--navy);margin-bottom:8px;}
+.feat-desc{font-size:.88rem;color:var(--muted);line-height:1.7;}
+
+/* ── ENCRYPTION CALLOUT ── */
+.enc-section{background:var(--navy);padding:80px 6%;}
+.enc-inner{max-width:900px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;}
+.enc-left .section-title{color:var(--cream);}
+.enc-left .section-sub{color:rgba(250,247,242,.6);margin-top:16px;}
+.enc-right{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:28px;}
+.enc-row{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:.88rem;}
+.enc-row:last-child{border-bottom:none;}
+.enc-label{color:rgba(250,247,242,.5);}
+.enc-val{font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--safe);font-weight:600;}
+.enc-val.red{color:#ef4444;}
+.fp{background:rgba(58,125,90,.1);border:1px solid rgba(58,125,90,.2);border-radius:8px;padding:12px;margin-top:16px;text-align:center;}
+.fp-label{font-size:.65rem;color:rgba(250,247,242,.4);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;}
+.fp-val{font-family:'JetBrains Mono',monospace;font-size:.95rem;color:var(--safe);letter-spacing:3px;font-weight:600;}
+@media(max-width:700px){.enc-inner{grid-template-columns:1fr;}.enc-left{text-align:center;}}
+
+/* ── VARIANTS ── */
+.variants{background:var(--cream2);}
+.variants-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:24px;max-width:900px;margin:60px auto 0;}
+.var-card{border-radius:18px;padding:36px 28px;border:2px solid transparent;transition:all .25s;cursor:default;position:relative;overflow:hidden;}
+.var-card.iron{background:linear-gradient(145deg,#1A2E4A,#0F1E30);border-color:rgba(200,146,42,.3);}
+.var-card.grace{background:linear-gradient(145deg,#2E1A3A,#1E0F28);border-color:rgba(232,184,75,.3);}
+.var-card.word{background:linear-gradient(145deg,#1A2E1A,#0F1E0F);border-color:rgba(90,160,90,.3);}
+.var-card:hover{transform:translateY(-4px);}
+.var-icon{font-size:2.8rem;margin-bottom:16px;}
+.var-name{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:900;color:var(--white);margin-bottom:6px;}
+.var-tag{font-size:.78rem;font-weight:600;letter-spacing:1px;text-transform:uppercase;margin-bottom:16px;}
+.iron .var-tag{color:var(--gold2);}
+.grace .var-tag{color:#D4A0F0;}
+.word .var-tag{color:#7BAD85;}
+.var-desc{font-size:.88rem;color:rgba(255,255,255,.55);line-height:1.7;}
+
+/* ── PRICING ── */
+.pricing{background:var(--cream);}
+.billing-toggle{display:flex;align-items:center;justify-content:center;gap:14px;margin:40px 0;}
+.billing-label{font-size:.9rem;font-weight:600;color:var(--muted);}
+.billing-label.active{color:var(--navy);}
+.toggle-switch{position:relative;width:50px;height:26px;cursor:pointer;}
+.toggle-switch input{opacity:0;width:0;height:0;}
+.ts-slider{position:absolute;inset:0;background:var(--border);border-radius:100px;transition:.3s;}
+.ts-slider:before{content:'';position:absolute;width:20px;height:20px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.3s;box-shadow:0 1px 4px rgba(0,0,0,.15);}
+.toggle-switch input:checked+.ts-slider{background:var(--gold);}
+.toggle-switch input:checked+.ts-slider:before{transform:translateX(24px);}
+.save-badge{background:rgba(58,125,90,.12);color:var(--safe);border:1px solid rgba(58,125,90,.25);border-radius:100px;padding:3px 10px;font-size:.72rem;font-weight:700;}
+
+.pricing-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px;max-width:980px;margin:0 auto;}
+.price-card{background:var(--white);border:2px solid var(--border);border-radius:18px;padding:32px 26px;position:relative;transition:all .25s;}
+.price-card:hover{transform:translateY(-4px);box-shadow:0 16px 48px rgba(26,46,74,.1);}
+.price-card.popular{border-color:var(--gold);box-shadow:0 0 0 4px rgba(200,146,42,.1);}
+.popular-badge{position:absolute;top:-13px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--navy);font-size:.72rem;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:4px 16px;border-radius:100px;white-space:nowrap;}
+.price-name{font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:700;color:var(--navy);margin-bottom:4px;}
+.price-tag{font-size:.78rem;color:var(--muted);margin-bottom:20px;}
+.price-amount{display:flex;align-items:baseline;gap:4px;margin-bottom:6px;}
+.price-dollar{font-family:'Playfair Display',serif;font-size:2.6rem;font-weight:900;color:var(--navy);}
+.price-period{font-size:.82rem;color:var(--muted);}
+.price-annual{font-size:.75rem;color:var(--safe);font-weight:600;margin-bottom:20px;min-height:18px;}
+.price-divider{height:1px;background:var(--border);margin:20px 0;}
+.price-features{list-style:none;display:flex;flex-direction:column;gap:10px;margin-bottom:28px;}
+.price-features li{display:flex;align-items:flex-start;gap:10px;font-size:.87rem;color:var(--muted);line-height:1.5;}
+.price-features li::before{content:'✓';color:var(--safe);font-weight:700;flex-shrink:0;margin-top:1px;}
+.price-features li.dim{color:var(--border);}
+.price-features li.dim::before{content:'—';color:var(--border);}
+.btn-price{width:100%;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:.9rem;font-weight:700;padding:12px;cursor:pointer;transition:all .2s;text-align:center;border:2px solid var(--border);background:transparent;color:var(--navy);}
+.btn-price:hover{border-color:var(--gold);color:var(--gold);}
+.btn-price.primary{background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--navy);border:none;}
+.btn-price.primary:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(200,146,42,.35);}
+
+/* ── TESTIMONIALS ── */
+.testimonials{background:var(--navy2);}
+.testimonials .section-title{color:var(--cream);}
+.testimonials .section-sub{color:rgba(250,247,242,.55);}
+.testi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px;max-width:1000px;margin:56px auto 0;}
+.testi-card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:28px;}
+.testi-quote{font-family:'Playfair Display',serif;font-size:1.05rem;font-style:italic;color:var(--cream);line-height:1.75;margin-bottom:20px;}
+.testi-author{display:flex;align-items:center;gap:12px;}
+.testi-avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;color:var(--navy);}
+.testi-name{font-size:.88rem;font-weight:700;color:var(--cream);}
+.testi-role{font-size:.75rem;color:rgba(250,247,242,.45);}
+
+/* ── FAQ ── */
+.faq{background:var(--cream);}
+.faq-list{max-width:720px;margin:56px auto 0;display:flex;flex-direction:column;gap:2px;}
+.faq-item{border:1px solid var(--border);border-radius:10px;overflow:hidden;background:var(--white);}
+.faq-item+.faq-item{margin-top:4px;}
+.faq-q{width:100%;background:none;border:none;padding:20px 24px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.95rem;font-weight:700;color:var(--navy);text-align:left;gap:16px;}
+.faq-q:hover{background:var(--cream);}
+.faq-chevron{font-size:1.1rem;color:var(--gold);transition:transform .25s;flex-shrink:0;}
+.faq-item.open .faq-chevron{transform:rotate(180deg);}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .3s ease;}
+.faq-item.open .faq-a{max-height:300px;}
+.faq-a-inner{padding:0 24px 20px;font-size:.9rem;color:var(--muted);line-height:1.75;border-top:1px solid var(--border);}
+
+/* ── CTA STRIP ── */
+.cta-strip{background:linear-gradient(135deg,var(--navy),var(--navy2));padding:100px 6%;text-align:center;}
+.cta-strip h2{font-family:'Playfair Display',serif;font-size:clamp(2rem,4vw,3rem);font-weight:900;color:var(--cream);margin-bottom:14px;}
+.cta-strip h2 em{font-style:italic;color:var(--gold);}
+.cta-strip p{font-size:1.05rem;color:rgba(250,247,242,.6);max-width:520px;margin:0 auto 40px;line-height:1.75;}
+.cta-row{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;}
+
+/* ── FOOTER ── */
+footer{background:var(--navy2);border-top:1px solid rgba(255,255,255,.06);padding:56px 6% 32px;}
+.footer-inner{max-width:1060px;margin:0 auto;}
+.footer-top{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;margin-bottom:48px;}
+.footer-logo{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:700;color:var(--cream);margin-bottom:10px;}
+.footer-logo span{color:var(--gold);}
+.footer-desc{font-size:.85rem;color:rgba(250,247,242,.4);line-height:1.7;margin-bottom:16px;}
+.footer-enc{display:inline-flex;align-items:center;gap:6px;font-size:.72rem;font-weight:700;color:var(--safe);background:rgba(58,125,90,.1);border:1px solid rgba(58,125,90,.2);border-radius:100px;padding:4px 12px;}
+.footer-col-title{font-size:.72rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(250,247,242,.3);margin-bottom:16px;}
+.footer-links{list-style:none;display:flex;flex-direction:column;gap:10px;}
+.footer-links a{text-decoration:none;font-size:.87rem;color:rgba(250,247,242,.4);transition:color .2s;}
+.footer-links a:hover{color:var(--gold);}
+.footer-bottom{border-top:1px solid rgba(255,255,255,.06);padding-top:24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+.footer-copy{font-size:.78rem;color:rgba(250,247,242,.25);}
+.footer-pp{display:flex;gap:20px;}
+.footer-pp a{font-size:.78rem;color:rgba(250,247,242,.3);text-decoration:none;}
+.footer-pp a:hover{color:var(--gold);}
+.peak-tag{font-size:.72rem;color:rgba(250,247,242,.2);margin-top:6px;}
+.peak-tag a{color:rgba(200,146,42,.4);text-decoration:none;}
+.peak-tag a:hover{color:var(--gold);}
+@media(max-width:800px){.footer-top{grid-template-columns:1fr 1fr;}}
+@media(max-width:500px){.footer-top{grid-template-columns:1fr;}}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:translateY(0);}}
+@keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-8px);}}
+.fade-up{opacity:0;animation:fadeUp .7s forwards;}
+.delay-1{animation-delay:.1s;}
+.delay-2{animation-delay:.2s;}
+.delay-3{animation-delay:.3s;}
+.delay-4{animation-delay:.4s;}
+.mockup-browser{animation:float 6s ease-in-out infinite;}
+
+/* ── SCROLL REVEAL ── */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .6s,transform .6s;}
+.reveal.visible{opacity:1;transform:translateY(0);}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="nav">
+  <a href="#" class="nav-logo">
+    <span class="nav-logo-text">Word<span>Pal</span></span>
+    <span class="nav-logo-tag">Encrypted</span>
+  </a>
+  <div class="nav-links">
+    <a href="#how">How It Works</a>
+    <a href="#features">Features</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#faq">FAQ</a>
+    <a href="/cdn-cgi/l/email-protection#a6cdc3d0cfc8e6d6c3c7cdd6cac7d2c0c9d4cbd588c5c9cb" class="btn-nav">Request a Demo</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-ornament"></div>
+
+  <div class="enc-pill fade-up">🔒 AES-256 End-to-End Encrypted</div>
+
+  <h1 class="fade-up delay-1">
+    The Word,<br><em>delivered.</em>
+  </h1>
+
+  <p class="hero-sub fade-up delay-2">
+    WordPal replaces scattered emails and group texts with a private encrypted feed for your ministry group. We deploy it under whatever name you choose — your members never see WordPal. They see you.
+  </p>
+
+  <div class="hero-cta-row fade-up delay-3">
+    <a href="/cdn-cgi/l/email-protection#4b202e3d22250b3b2e2a203b272a3f2d2439263865282426" class="btn-primary">✦ Request a Demo</a>
+    <a href="#how" class="btn-secondary">See How It Works →</a>
+  </div>
+
+  <!-- MOCKUP -->
+  <div class="hero-mockup fade-up delay-4">
+    <div class="mockup-browser">
+      <div class="mockup-bar">
+        <div class="mockup-dots">
+          <div class="mockup-dot"></div>
+          <div class="mockup-dot"></div>
+          <div class="mockup-dot"></div>
+        </div>
+        <div class="mockup-url">ironpal.wordpal.fun</div>
+      </div>
+      <div class="mockup-content">
+
+        <div class="mock-msg scripture">
+          <div class="mock-header">
+            <span class="mock-badge badge-s">📖 Scripture</span>
+            <span class="mock-new">NEW</span>
+            <span class="mock-from">Pastor Mike</span>
+            <span class="mock-time">Today · 6:32 AM</span>
+            <span class="mock-enc">🔒</span>
+          </div>
+          <div class="mock-verse">"As iron sharpens iron, so one person sharpens another."</div>
+          <div class="mock-ref">— Proverbs 27:17 <span style="color:var(--muted);font-weight:400;">(NIV)</span></div>
+          <div class="mock-body" style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:.8rem;color:var(--muted);">This week's theme — showing up for each other even when it's inconvenient.</div>
+        </div>
+
+        <div class="mock-msg discussion">
+          <div class="mock-header">
+            <span class="mock-badge badge-d">💬 Discussion</span>
+            <span class="mock-new">NEW</span>
+            <span class="mock-from">Pastor Mike</span>
+            <span class="mock-time">Today · 6:35 AM</span>
+            <span class="mock-enc">🔒</span>
+          </div>
+          <div class="mock-body">Who in your life is sharpening you right now? Come ready to share Thursday.</div>
+        </div>
+
+        <div class="mock-msg prayer">
+          <div class="mock-header">
+            <span class="mock-badge badge-p">🙏 Prayer</span>
+            <span class="mock-from">Pastor Mike</span>
+            <span class="mock-time">Mon · 7:10 AM</span>
+            <span class="mock-enc">🔒</span>
+          </div>
+          <div class="mock-body">Pray for the Johnson family this week — James had surgery Monday and is recovering at home.</div>
+        </div>
+
+        <div class="mock-msg announce">
+          <div class="mock-header">
+            <span class="mock-badge badge-a">📢 Announce</span>
+            <span class="mock-from">Pastor Mike</span>
+            <span class="mock-time">Sat · 8:00 AM</span>
+            <span class="mock-enc">🔒</span>
+          </div>
+          <div class="mock-body" style="font-weight:700;margin-bottom:4px;">This Week's Meeting</div>
+          <div class="mock-body">Thursday 7PM — location moved to the Hendersons' house. Address in the group chat.</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how" id="how">
+  <div class="section-label center" style="text-align:center;">Simple by design</div>
+  <div class="section-title center" style="text-align:center;max-width:600px;margin:0 auto;">
+    Four steps from signup<br>to <em>your first post</em>
+  </div>
+  <div class="section-sub center" style="text-align:center;">
+    No app to download. No account to create. Your members open a URL, enter a PIN, and start reading.
+  </div>
+  <div class="steps">
+    <div class="step reveal">
+      <div class="step-num">01</div>
+      <div class="step-icon">⚙️</div>
+      <div class="step-title">We set it up for you</div>
+      <div class="step-desc">Tell us your ministry name, colors and PIN. We configure your private encrypted space in minutes.</div>
+      <div class="step-arrow">→</div>
+    </div>
+    <div class="step reveal" style="transition-delay:.1s;">
+      <div class="step-num">02</div>
+      <div class="step-icon">🔗</div>
+      <div class="step-title">Share one link</div>
+      <div class="step-desc">Text your group a single URL. They bookmark it. That's all they ever need — no downloads, no accounts.</div>
+      <div class="step-arrow">→</div>
+    </div>
+    <div class="step reveal" style="transition-delay:.2s;">
+      <div class="step-num">03</div>
+      <div class="step-icon">✏️</div>
+      <div class="step-title">Leader posts content</div>
+      <div class="step-desc">Post scripture, a discussion question, prayer request, or announcement. Encrypted automatically before it leaves your device.</div>
+      <div class="step-arrow">→</div>
+    </div>
+    <div class="step reveal" style="transition-delay:.3s;">
+      <div class="step-num">04</div>
+      <div class="step-icon">📖</div>
+      <div class="step-title">Members read anytime</div>
+      <div class="step-desc">Open Tuesday morning, read Monday's post. Open Friday, see what's new. Every post stays in the feed until the leader removes it.</div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features" id="features">
+  <div class="section-label center">Built for ministry</div>
+  <div class="section-title center" style="max-width:560px;">
+    Everything a group needs.<br><em>Nothing it doesn't.</em>
+  </div>
+
+  <div class="features-grid">
+    <div class="feat-card fc-gold reveal">
+      <div class="feat-icon">📖</div>
+      <div class="feat-title">Scripture in four translations</div>
+      <div class="feat-desc">Pick from KJV, NIV, ESV, or NKJV with a single tap — or enter any verse manually. The text appears beautifully formatted in every member's feed.</div>
+    </div>
+    <div class="feat-card fc-blue reveal" style="transition-delay:.05s;">
+      <div class="feat-icon">💬</div>
+      <div class="feat-title">Discussion questions</div>
+      <div class="feat-desc">Post your weekly question days in advance. Members read it on their own time, show up prepared and ready to engage.</div>
+    </div>
+    <div class="feat-card fc-green reveal" style="transition-delay:.1s;">
+      <div class="feat-icon">🙏</div>
+      <div class="feat-title">Prayer requests</div>
+      <div class="feat-desc">Share prayer needs with the group — privately, securely. No more group texts where someone's personal request gets forwarded accidentally.</div>
+    </div>
+    <div class="feat-card fc-amber reveal" style="transition-delay:.15s;">
+      <div class="feat-icon">📢</div>
+      <div class="feat-title">Announcements</div>
+      <div class="feat-desc">Location changes, schedule updates, event reminders — posted once, readable forever until removed. No more "did you see my email?"</div>
+    </div>
+    <div class="feat-card fc-gold reveal" style="transition-delay:.2s;">
+      <div class="feat-icon">📱</div>
+      <div class="feat-title">Push notifications</div>
+      <div class="feat-desc">Members get a notification the moment you post — even with the browser closed. They tap it, the feed opens. No app store required.</div>
+    </div>
+    <div class="feat-card fc-green reveal" style="transition-delay:.25s;">
+      <div class="feat-icon">📋</div>
+      <div class="feat-title">Persistent history</div>
+      <div class="feat-desc">Every post stays in the feed until you remove it. Members who miss a week can scroll back and catch up completely — just like an inbox.</div>
+    </div>
+    <div class="feat-card fc-blue reveal" style="transition-delay:.3s;">
+      <div class="feat-icon">🏷️</div>
+      <div class="feat-title">White-label branding</div>
+      <div class="feat-desc">Your ministry name, colors and logo. Members see IronPal, GracePal, or whatever you name it — not WordPal. Feels like yours.</div>
+    </div>
+    <div class="feat-card fc-amber reveal" style="transition-delay:.35s;">
+      <div class="feat-icon">✨</div>
+      <div class="feat-title">NEW badge on unread posts</div>
+      <div class="feat-desc">Posts added since a member's last visit are marked NEW automatically. They always know exactly what they've missed without scrolling everything.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ENCRYPTION -->
+<section class="enc-section" id="security">
+  <div class="enc-inner">
+    <div class="enc-left reveal">
+      <div class="section-label" style="color:var(--gold2);">Security first</div>
+      <div class="section-title">
+        Prayer requests aren't<br><em>meant to be public</em>
+      </div>
+      <p class="section-sub">
+        Every message is encrypted in the browser before it leaves the device. Supabase stores only ciphertext. Not us, not Supabase, not anyone — only your group members can read what's posted.
+      </p>
+    </div>
+    <div class="enc-right reveal" style="transition-delay:.15s;">
+      <div class="enc-row"><span class="enc-label">Algorithm</span><span class="enc-val">AES-GCM 256-bit</span></div>
+      <div class="enc-row"><span class="enc-label">Key Source</span><span class="enc-val">Browser only</span></div>
+      <div class="enc-row"><span class="enc-label">Server Can Read?</span><span class="enc-val red">NO</span></div>
+      <div class="enc-row"><span class="enc-label">Third Party Can Read?</span><span class="enc-val red">NO</span></div>
+      <div class="enc-row"><span class="enc-label">Supabase Stores</span><span class="enc-val">Ciphertext only</span></div>
+      <div class="fp">
+        <div class="fp-label">Example Room Fingerprint</div>
+        <div class="fp-val">A3·F7·2C·9B·E1·44</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WHITE LABEL -->
+<section class="variants">
+  <div class="section-label center">White-label included</div>
+  <div class="section-title center" style="max-width:640px;">
+    Your members never see WordPal.<br><em>They see your ministry.</em>
+  </div>
+  <p class="section-sub center" style="margin:16px auto 0;text-align:center;max-width:580px;">
+    When we deploy WordPal for your group, we brand it completely to you — your name, your colors, your icon. Here are three examples of the same platform deployed for three different ministries.
+  </p>
+
+  <div class="variants-grid">
+    <div class="var-card iron reveal">
+      <div class="var-icon">⚒</div>
+      <div class="var-name">IronPal</div>
+      <div class="var-tag">Example — Men's Bible Study</div>
+      <div class="var-desc">A men's group at First Baptist wanted something bold and direct. We deployed WordPal as "IronPal" with their colors. Their guys just see IronPal — the technology is invisible.</div>
+    </div>
+    <div class="var-card grace reveal" style="transition-delay:.1s;">
+      <div class="var-icon">✦</div>
+      <div class="var-name">GracePal</div>
+      <div class="var-tag">Example — Women's Ministry</div>
+      <div class="var-desc">A women's ministry wanted a warmer feel. Same platform, deployed as "GracePal" with softer accent colors. Their members open GracePal — they've never heard of WordPal.</div>
+    </div>
+    <div class="var-card word reveal" style="transition-delay:.2s;">
+      <div class="var-icon">✝</div>
+      <div class="var-name">Your Name Here</div>
+      <div class="var-tag">Your Ministry Group</div>
+      <div class="var-desc">Staff team, deacon board, small group, prayer circle — whatever you call your ministry, that's what your members see. You pick the name. We handle the rest.</div>
+    </div>
+  </div>
+
+  <p style="text-align:center;margin-top:32px;font-size:.88rem;color:var(--muted);">
+    White-label branding is included on Growth and Ministry Pro plans — no extra charge.
+  </p>
+</section>
+
+<!-- PRICING -->
+<section class="pricing" id="pricing">
+  <div class="section-label center">Simple pricing</div>
+  <div class="section-title center" style="max-width:540px;">
+    Flat monthly. <em>No surprises.</em>
+  </div>
+  <p class="section-sub center" style="margin:14px auto 0;text-align:center;">
+    One price per ministry group. Cancel anytime.
+  </p>
+
+  <div class="billing-toggle">
+    <span class="billing-label active" id="lbl-monthly">Monthly</span>
+    <label class="toggle-switch">
+      <input type="checkbox" id="billing-toggle" onchange="toggleBilling()">
+      <span class="ts-slider"></span>
+    </label>
+    <span class="billing-label" id="lbl-annual">Annual</span>
+    <span class="save-badge">Save 20%</span>
+  </div>
+
+  <div class="pricing-grid">
+    <div class="price-card reveal">
+      <div class="price-name">Starter</div>
+      <div class="price-tag">Small groups up to 25 members</div>
+      <div class="price-amount">
+        <span class="price-dollar" id="p1">$29</span>
+        <span class="price-period">/month</span>
+      </div>
+      <div class="price-annual" id="a1">&nbsp;</div>
+      <div class="price-divider"></div>
+      <ul class="price-features">
+        <li>Up to 25 members</li>
+        <li>All 4 content types</li>
+        <li>Push notifications</li>
+        <li>500 post history</li>
+        <li>PIN-gated access</li>
+        <li class="dim">White-label branding</li>
+        <li class="dim">Custom domain</li>
+      </ul>
+      <button class="btn-price" onclick="location.href='mailto:kevin@peakplatforms.com?subject=WordPal Starter'">Get Started</button>
+    </div>
+
+    <div class="price-card popular reveal" style="transition-delay:.1s;">
+      <div class="popular-badge">Most Popular</div>
+      <div class="price-name">Growth</div>
+      <div class="price-tag">Growing ministries up to 75</div>
+      <div class="price-amount">
+        <span class="price-dollar" id="p2">$79</span>
+        <span class="price-period">/month</span>
+      </div>
+      <div class="price-annual" id="a2">&nbsp;</div>
+      <div class="price-divider"></div>
+      <ul class="price-features">
+        <li>Up to 75 members</li>
+        <li>All 4 content types</li>
+        <li>Push notifications</li>
+        <li>500 post history</li>
+        <li>PIN-gated access</li>
+        <li>White-label branding</li>
+        <li class="dim">Custom domain</li>
+      </ul>
+      <button class="btn-price primary" onclick="location.href='mailto:kevin@peakplatforms.com?subject=WordPal Growth'">Get Started</button>
+    </div>
+
+    <div class="price-card reveal" style="transition-delay:.2s;">
+      <div class="price-name">Ministry Pro</div>
+      <div class="price-tag">Larger ministries, staff teams</div>
+      <div class="price-amount">
+        <span class="price-dollar" id="p3">$149</span>
+        <span class="price-period">/month</span>
+      </div>
+      <div class="price-annual" id="a3">&nbsp;</div>
+      <div class="price-divider"></div>
+      <ul class="price-features">
+        <li>Unlimited members</li>
+        <li>All 4 content types</li>
+        <li>Push notifications</li>
+        <li>500 post history</li>
+        <li>PIN-gated access</li>
+        <li>White-label branding</li>
+        <li>Custom domain</li>
+      </ul>
+      <button class="btn-price" onclick="location.href='mailto:kevin@peakplatforms.com?subject=WordPal Ministry Pro'">Get Started</button>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="testimonials">
+  <div class="section-label center" style="color:var(--gold2);">From the community</div>
+  <div class="section-title center" style="max-width:540px;">
+    What ministry leaders are saying
+  </div>
+
+  <div class="testi-grid">
+    <div class="testi-card reveal">
+      <div class="testi-quote">"I used to send the week's scripture by email every Monday. Half the guys never opened it. Now I post it to IronPal and I can see the conversation start before Thursday night even arrives."</div>
+      <div class="testi-author">
+        <div class="testi-avatar">M</div>
+        <div>
+          <div class="testi-name">Pastor Mike</div>
+          <div class="testi-role">Men's Bible Study Leader · Pilot Program</div>
+        </div>
+      </div>
+    </div>
+    <div class="testi-card reveal" style="transition-delay:.1s;">
+      <div class="testi-quote">"The prayer request feature alone is worth it. Women in our group share things they'd never put in a group text. Knowing it's encrypted makes them feel safe to be real."</div>
+      <div class="testi-author">
+        <div class="testi-avatar">S</div>
+        <div>
+          <div class="testi-name">Sarah</div>
+          <div class="testi-role">Women's Ministry Coordinator · Pilot Program</div>
+        </div>
+      </div>
+    </div>
+    <div class="testi-card reveal" style="transition-delay:.2s;">
+      <div class="testi-quote">"No app to download, no account to create — I texted the link to 18 guys and within an hour they were all in the feed. Setup was genuinely two minutes."</div>
+      <div class="testi-author">
+        <div class="testi-avatar">D</div>
+        <div>
+          <div class="testi-name">David</div>
+          <div class="testi-role">Small Group Pastor · Pilot Program</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="faq" id="faq">
+  <div class="section-label center">Questions answered</div>
+  <div class="section-title center" style="max-width:500px;">
+    Everything you need to know
+  </div>
+
+  <div class="faq-list">
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        Do my members need to download an app?
+        <span class="faq-chevron">▾</span>
+      </button>
+      <div class="faq-a"><div class="faq-a-inner">No. WordPal runs entirely in the browser. Members open a URL, enter the group PIN, and they're in. Most people bookmark it or add it to their home screen — after that it feels like an app.</div></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        What does "end-to-end encrypted" actually mean?
+        <span class="faq-chevron">▾</span>
+      </button>
+      <div class="faq-a"><div class="faq-a-inner">It means messages are encrypted in the browser before they leave the device — using AES-256-GCM encryption, the same standard used by banks. Our servers store only encrypted ciphertext. Not us, not Supabase, not anyone outside your group can read what's posted.</div></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        Can members see old posts or just new ones?
+        <span class="faq-chevron">▾</span>
+      </button>
+      <div class="faq-a"><div class="faq-a-inner">All posts stay in the feed until the leader removes them — up to 500 posts. A member who misses a week opens the app and reads everything they missed. Posts added since their last visit are automatically marked NEW.</div></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        How do push notifications work?
+        <span class="faq-chevron">▾</span>
+      </button>
+      <div class="faq-a"><div class="faq-a-inner">Members tap "Enable Notifications" once and they're subscribed. When the leader posts, every subscribed member gets a phone notification — even with the browser closed. On iPhones, members need to add the page to their home screen first (a 30-second one-time step). Android works straight from the browser.</div></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        Can I brand it with my ministry's name?
+        <span class="faq-chevron">▾</span>
+      </button>
+      <div class="faq-a"><div class="faq-a-inner">Yes — Growth and Ministry Pro plans include full white-label branding. Your members see your ministry name, colors, and tagline. Ministry Pro includes a custom domain (ironpal.yourchurch.com, for example). WordPal never appears to your members.</div></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        How is WordPal different from a group text or email?
+        <span class="faq-chevron">▾</span>
+      </button>
+      <div class="faq-a"><div class="faq-a-inner">Group texts are unencrypted, cluttered with replies, and impossible to search. Email requires accounts and lands in spam. WordPal is a private encrypted feed — structured by content type (scripture, discussion, prayer, announcements), persistent, and accessible without an account. It's purpose-built for ministry communication, not adapted from it.</div></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        How do I get set up?
+        <span class="faq-chevron">▾</span>
+      </button>
+      <div class="faq-a"><div class="faq-a-inner">Request a demo and we'll set everything up for you — ministry name, colors, PIN, and a custom URL. You're up and running the same day. We handle the technical side; you handle the ministry.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA STRIP -->
+<section class="cta-strip">
+  <h2>Your ministry. Your name.<br><em>Ready when you are.</em></h2>
+  <p>Request a demo and we'll take it from there.</p>
+  <div class="cta-row">
+    <a href="/cdn-cgi/l/email-protection#abc0ceddc2c5ebdbcecac0dbc7cadfcdc4d9c6d885c8c4c694d8dec9c1cec8df96fcc4d9cffbcac78befcec6c48bf9cedadeced8df" class="btn-primary">✦ Request a Demo</a>
+    <a href="#pricing" class="btn-secondary" style="color:rgba(250,247,242,.7);border-color:rgba(255,255,255,.2);">View Pricing →</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div>
+        <div class="footer-logo">Word<span>Pal</span></div>
+        <div class="footer-desc">Encrypted communications for Bible studies, ministry teams, and church staff. No app. No accounts. Just your group, your message, protected.</div>
+        <div class="footer-enc">🔒 AES-256 End-to-End Encrypted</div>
+        <div class="peak-tag" style="margin-top:12px;">A <a href="https://peakplatforms.com">Peak Platforms</a> product</div>
+      </div>
+      <div>
+        <div class="footer-col-title">Product</div>
+        <ul class="footer-links">
+          <li><a href="#how">How It Works</a></li>
+          <li><a href="#features">Features</a></li>
+          <li><a href="#pricing">Pricing</a></li>
+          <li><a href="#security">Security</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-col-title">Use Cases</div>
+        <ul class="footer-links">
+          <li><a href="#features">Bible Study Groups</a></li>
+          <li><a href="#features">Women's Ministry</a></li>
+          <li><a href="#features">Men's Groups</a></li>
+          <li><a href="#features">Church Staff</a></li>
+          <li><a href="#features">Prayer Circles</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-col-title">Company</div>
+        <ul class="footer-links">
+          <li><a href="https://peakplatforms.com">Peak Platforms</a></li>
+          <li><a href="https://cheerpal.fun">CheerPal</a></li>
+          <li><a href="https://teampal.fun">TeamPal</a></li>
+          <li><a href="https://hotseat.fun">HotSeat</a></li>
+          <li><a href="/cdn-cgi/l/email-protection#93f8f6e5fafdd3e3f6f2f8e3fff2e7f5fce1fee0bdf0fcfe">Contact</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-copy">© 2025 Peak Financial Group LLC · DBA Peak Platforms · All rights reserved</div>
+      <div class="footer-pp">
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+// NAV SCROLL
+window.addEventListener('scroll',function(){
+  document.getElementById('nav').classList.toggle('scrolled',window.scrollY>20);
+});
+
+// SCROLL REVEAL
+var observer=new IntersectionObserver(function(entries){
+  entries.forEach(function(e){if(e.isIntersecting)e.target.classList.add('visible');});
+},{threshold:.12});
+document.querySelectorAll('.reveal').forEach(function(el){observer.observe(el);});
+
+// FAQ
+function toggleFaq(btn){
+  var item=btn.parentElement;
+  var open=item.classList.contains('open');
+  document.querySelectorAll('.faq-item').forEach(function(i){i.classList.remove('open');});
+  if(!open)item.classList.add('open');
+}
+
+// BILLING TOGGLE
+var prices={
+  monthly:  {p1:'$29', p2:'$79',  p3:'$149'},
+  annual:   {p1:'$23', p2:'$63',  p3:'$119'},
+  annualSub:{p1:'$276/yr', p2:'$756/yr', p3:'$1,428/yr'}
+};
+function toggleBilling(){
+  var annual=document.getElementById('billing-toggle').checked;
+  document.getElementById('lbl-monthly').classList.toggle('active',!annual);
+  document.getElementById('lbl-annual').classList.toggle('active',annual);
+  var p=annual?prices.annual:prices.monthly;
+  ['1','2','3'].forEach(function(n){
+    document.getElementById('p'+n).textContent=p['p'+n];
+    document.getElementById('a'+n).textContent=annual?prices.annualSub['p'+n]:'';
+  });
+}
+</script>
+</body>
+</html>
