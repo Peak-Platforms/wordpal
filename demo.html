@@ -32,7 +32,10 @@ var WL = {
   MEMBER_PIN:     "1111",
 
   // Web Push
-  VAPID_PUBLIC_KEY: "BAewQQaMhRp6wQOxrxZg7dfAuZRBECeZDG5jW8DHMB4JgtZF9w_SMDs8Tk2vgv8DQsmY2mljEkYDVEQdsrLeJzY"
+  VAPID_PUBLIC_KEY: "BAewQQaMhRp6wQOxrxZg7dfAuZRBECeZDG5jW8DHMB4JgtZF9w_SMDs8Tk2vgv8DQsmY2mljEkYDVEQdsrLeJzY",
+
+  // Bible API -- free key at scripture.api.bible (5,000 lookups/day)
+  BIBLE_API_KEY: "-QppvFTo5H3tHHUU63eIC"
 };
 </script>
 <!-- ============================================================ -->
@@ -189,8 +192,6 @@ textarea.txt-input{resize:vertical;min-height:78px;line-height:1.6;}
 <!-- DEMO BANNER -->
 <div style="background:linear-gradient(135deg,#1A2E4A,#0F1E30);border-bottom:2px solid #C8922A;padding:10px 20px;text-align:center;font-family:'DM Sans',sans-serif;font-size:.82rem;color:rgba(230,237,243,.7);position:sticky;top:0;z-index:200;">
   &#128274; <strong style="color:#E8B84B;">Live Demo</strong> &nbsp;|&nbsp;
-  Leader PIN: <strong style="color:#C8922A;font-family:'JetBrains Mono',monospace;">1234</strong>
-  &nbsp;&nbsp;
   Member PIN: <strong style="color:#5B8BF5;font-family:'JetBrains Mono',monospace;">1111</strong>
   &nbsp;&nbsp;&mdash;&nbsp;&nbsp;
   <a href="https://wordpal.fun" style="color:#C8922A;text-decoration:none;font-weight:600;">Learn more at wordpal.fun &rarr;</a>
@@ -291,9 +292,25 @@ textarea.txt-input{resize:vertical;min-height:78px;line-height:1.6;}
         <!-- Scripture -->
         <div id="panel-scripture">
           <div class="trans-row" id="trans-row"></div>
+
+          <!-- Search any verse -->
+          <div id="bible-search-wrap" style="margin-bottom:10px;">
+            <div style="display:flex;gap:8px;">
+              <input class="txt-input" id="verse-search" placeholder="Search any reference… (e.g. John 3:16)" style="margin-bottom:0;flex:1;" onkeydown="if(event.key==='Enter')fetchVerse()">
+              <button class="btn-sm" id="verse-fetch-btn" onclick="fetchVerse()" style="white-space:nowrap;flex-shrink:0;">Lookup →</button>
+            </div>
+            <div id="verse-fetch-status" style="font-size:.75rem;color:var(--muted);margin-top:5px;min-height:16px;"></div>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+            <div style="height:1px;flex:1;background:var(--border);"></div>
+            <span style="font-size:.72rem;color:var(--muted);font-weight:600;">or pick a preset</span>
+            <div style="height:1px;flex:1;background:var(--border);"></div>
+          </div>
+
           <label class="toggle-row">
             <label class="toggle"><input type="checkbox" id="custom-chk" onchange="toggleCustom()"><span class="tslider"></span></label>
-            <span style="font-size:.84rem;color:var(--muted);font-weight:600;">Enter custom verse</span>
+            <span style="font-size:.84rem;color:var(--muted);font-weight:600;">Enter verse text manually</span>
           </label>
           <div id="preset-wrap">
             <select class="txt-input" id="verse-sel" style="cursor:pointer;" onchange="updatePreview()"></select>
@@ -893,6 +910,80 @@ var VERSES={
 };
 var REFS=Object.keys(VERSES.NIV);
 
+// === BIBLE API ===
+var BIBLE_IDS={
+  KJV:  'de4e12af7f28f599-01',
+  NIV:  '78a9f6124f344018-01',
+  ESV:  'f421fe261da7624f-01',
+  NKJV: '65eec8e0b60e656b-01'
+};
+
+async function fetchVerse(){
+  var query=id('verse-search').value.trim();
+  var status=id('verse-fetch-status');
+  var btn=id('verse-fetch-btn');
+
+  if(!query){ status.textContent='Enter a reference first.'; return; }
+
+  if(!WL.BIBLE_API_KEY){
+    useCustom=true;
+    id('custom-chk').checked=true;
+    id('preset-wrap').style.display='none';
+    id('custom-wrap').style.display='block';
+    id('cust-ref').value=query;
+    id('cust-text').focus();
+    status.textContent='No API key set -- enter the verse text below.';
+    status.style.color='var(--gold)';
+    updatePreview();
+    return;
+  }
+
+  btn.disabled=true;
+  btn.textContent='Loading…';
+  status.textContent='';
+  status.style.color='var(--muted)';
+
+  try{
+    var bibleId=BIBLE_IDS[currentTrans]||BIBLE_IDS.KJV;
+    var url='https://api.scripture.api.bible/v1/bibles/'+bibleId+'/search?query='+encodeURIComponent(query)+'&limit=1&sort=relevance';
+    var resp=await fetch(url,{headers:{'api-key':WL.BIBLE_API_KEY}});
+    var data=await resp.json();
+
+    var passage=null;
+    if(data.data&&data.data.passages&&data.data.passages.length>0) passage=data.data.passages[0];
+    else if(data.data&&data.data.verses&&data.data.verses.length>0) passage=data.data.verses[0];
+
+    if(passage){
+      var raw=(passage.content||passage.text||'').replace(/<[^>]+>/g,' ').replace(/[ \t]+/g,' ').trim();
+      var ref=passage.reference;
+      useCustom=true;
+      id('custom-chk').checked=true;
+      id('preset-wrap').style.display='none';
+      id('custom-wrap').style.display='block';
+      id('cust-ref').value=ref;
+      id('cust-text').value=raw;
+      updatePreview();
+      status.textContent='✓ Found: '+ref+' ('+currentTrans+')';
+      status.style.color='var(--safe)';
+    } else {
+      status.textContent='Verse not found. Check the reference and try again.';
+      status.style.color='#ef4444';
+    }
+  } catch(e){
+    status.textContent='Lookup failed -- enter text manually below.';
+    status.style.color='#ef4444';
+    useCustom=true;
+    id('custom-chk').checked=true;
+    id('preset-wrap').style.display='none';
+    id('custom-wrap').style.display='block';
+    id('cust-ref').value=query;
+    updatePreview();
+  }
+
+  btn.disabled=false;
+  btn.textContent='Lookup →';
+}
+
 function buildVerseUI(){
   var tr=id('trans-row');tr.innerHTML='';
   ['KJV','NIV','ESV','NKJV'].forEach(function(t){
@@ -1092,3 +1183,4 @@ CREATE POLICY "anon delete" ON wp_messages FOR DELETE USING (true);
 
 </body>
 </html>
+
