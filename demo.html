@@ -14,7 +14,7 @@
 var WL = {
   MINISTRY_NAME:  "WordPal Demo",
   MINISTRY_TAG:   "Live Demo -- Try it out",
-  MINISTRY_ICON:  "📖",
+  MINISTRY_ICON:  "WP",
   ACCENT:         "#C8922A",
   ACCENT2:        "#E8B84B",
   DARK_MODE:      true,
@@ -28,7 +28,7 @@ var WL = {
   ROOM_KEY:       "wordpal-demo-2025-live-preview-ok!",
 
   // Demo PINs -- shared openly since this is a public demo
-  LEADER_PIN:     "1234",  // Only you know this
+  LEADER_PIN:     "1234",
   MEMBER_PIN:     "1111",
 
   // Web Push
@@ -192,6 +192,8 @@ textarea.txt-input{resize:vertical;min-height:78px;line-height:1.6;}
 <!-- DEMO BANNER -->
 <div style="background:linear-gradient(135deg,#1A2E4A,#0F1E30);border-bottom:2px solid #C8922A;padding:10px 20px;text-align:center;font-family:'DM Sans',sans-serif;font-size:.82rem;color:rgba(230,237,243,.7);position:sticky;top:0;z-index:200;">
   &#128274; <strong style="color:#E8B84B;">Live Demo</strong> &nbsp;|&nbsp;
+  Leader PIN: <strong style="color:#C8922A;font-family:'JetBrains Mono',monospace;">1234</strong>
+  &nbsp;&nbsp;
   Member PIN: <strong style="color:#5B8BF5;font-family:'JetBrains Mono',monospace;">1111</strong>
   &nbsp;&nbsp;&mdash;&nbsp;&nbsp;
   <a href="https://wordpal.fun" style="color:#C8922A;text-decoration:none;font-weight:600;">Learn more at wordpal.fun &rarr;</a>
@@ -1198,6 +1200,7 @@ CREATE POLICY "anon delete" ON wp_messages FOR DELETE USING (true);
 
 </body>
 </html>
+
 
 
 
