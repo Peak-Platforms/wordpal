@@ -960,8 +960,7 @@ async function fetchVerse(){
       var verseUrl='https://api.scripture.api.bible/v1/bibles/'+bibleId+'/verses/'+v.id+'?content-type=text&include-verse-numbers=false';
       var verseResp=await fetch(verseUrl,{headers:{'api-key':WL.BIBLE_API_KEY}});
       var verseData=await verseResp.json();
-      var raw=(verseData.data&&verseData.data.content||v.text||'').replace(/[
-]+/g,' ').replace(/\s+/g,' ').trim();
+      var raw=(verseData.data&&verseData.data.content||v.text||'').replace(/\s+/g,' ').trim();
       var ref=verseData.data&&verseData.data.reference||v.reference;
       populateVerse(ref,raw,status);
       status.textContent='✓ '+ref+' ('+currentTrans+')';
@@ -1200,7 +1199,3 @@ CREATE POLICY "anon delete" ON wp_messages FOR DELETE USING (true);
 
 </body>
 </html>
-
-
-
-
