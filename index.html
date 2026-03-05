@@ -19,7 +19,6 @@ var WL = {
   ACCENT2:        "#E8B84B",
   DARK_MODE:      true,
   POWERED_BY:     true,
-  BIBLE_API_KEY: "-QppvFTo5H3tHHUU63eIC",
 
   // Supabase
   SUPABASE_URL:   "https://ggvtxauxjkixszvyirsl.supabase.co",
@@ -28,7 +27,7 @@ var WL = {
   // Encryption -- generate a random string and paste it here.
   // This is the shared room key. Keep it secret. All members of
   // this group get it automatically when they load this page.
-  ROOM_KEY:       "REPLACE_WITH_RANDOM_32_CHAR_STRING",
+  ROOM_KEY:       "8abV2XtJpouUAkZrRfCO1vlb11cxxcxI",
 
   // Access PINs
   LEADER_PIN:     "1234",
@@ -846,10 +845,8 @@ var REFS=Object.keys(VERSES.NIV);
 // === BIBLE API ===
 // Free key at scripture.api.bible — 5,000 lookups/day
 var BIBLE_IDS={
-  KJV:  'de4e12af7f28f599-01',
-  NIV:  '78a9f6124f344018-01',
-  ESV:  'f421fe261da7624f-01',
-  NKJV: '65eec8e0b60e656b-01'
+  KJV: 'de4e12af7f28f599-02',
+  NIV: '78a9f6124f344018-01'
 };
 
 async function fetchVerse(){
@@ -933,7 +930,7 @@ async function fetchVerse(){
 
 function buildVerseUI(){
   var tr=id('trans-row');tr.innerHTML='';
-  ['KJV','NIV','ESV','NKJV'].forEach(function(t){
+  ['KJV','NIV'].forEach(function(t){
     var b=document.createElement('button');
     b.className='trans-btn'+(t===currentTrans?' active':'');
     b.textContent=t;
