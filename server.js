@@ -24,7 +24,11 @@ const server = http.createServer((req, res) => {
   let filePath = req.url === '/' ? '/index.html' : req.url;
   // Strip query strings
   filePath = filePath.split('?')[0];
-  const fullPath = path.join(__dirname, filePath);
+  let fullPath = path.join(__dirname, filePath);
+  // Try adding .html if no extension and file doesn't exist
+  if (!path.extname(fullPath) && !require('fs').existsSync(fullPath)) {
+    fullPath = fullPath + '.html';
+  }
   const ext = path.extname(fullPath);
 
   fs.readFile(fullPath, (err, data) => {
