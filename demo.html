@@ -1260,8 +1260,17 @@ function setType(t,btn){
   ['scripture','discussion','prayer','announce'].forEach(function(x){id('panel-'+x).style.display=x===t?'block':'none';});
 }
 function switchTab(name,btn){
+  // Hide all panels
+  ['post','feed','manage','live','notify'].forEach(function(t){
+    var p=id('panel-'+t); if(p) p.style.display='none';
+  });
+  // Also handle section-based tabs
   document.querySelectorAll('.section').forEach(function(s){s.classList.remove('active');});
   var el=id('tab-'+name);if(el)el.classList.add('active');
+  // Show target panel
+  var panel=id('panel-'+name);
+  if(panel) panel.style.display='block';
+  // Update tab button active state
   document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active');});
   if(btn)btn.classList.add('active');
   // Load feed when switching to it
@@ -1291,6 +1300,7 @@ CREATE POLICY "anon delete" ON wp_messages FOR DELETE USING (true);
 
 </body>
 </html>
+
 
 
 
