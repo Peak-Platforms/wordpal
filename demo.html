@@ -32,7 +32,12 @@ var WL = {
   MEMBER_PIN:     "1111",
 
   // Web Push
-  VAPID_PUBLIC_KEY: "BAewQQaMhRp6wQOxrxZg7dfAuZRBECeZDG5jW8DHMB4JgtZF9w_SMDs8Tk2vgv8DQsmY2mljEkYDVEQdsrLeJzY"
+  VAPID_PUBLIC_KEY: "BAewQQaMhRp6wQOxrxZg7dfAuZRBECeZDG5jW8DHMB4JgtZF9w_SMDs8Tk2vgv8DQsmY2mljEkYDVEQdsrLeJzY",
+
+  // Live Audio -- AzuraCast
+  STREAM_URL:    "http://157.245.208.49/radio.mp3",
+  ICECAST_URL:   "http://157.245.208.49/radio/8000/radio.mp3",
+  ICECAST_PASS:  "rcnYnytt"
 };
 </script>
 <!-- ============================================================ -->
@@ -133,6 +138,7 @@ textarea.txt-input{resize:vertical;min-height:78px;line-height:1.6;}
 .feed{display:flex;flex-direction:column;gap:14px;}
 .msg{background:var(--navy3);border:1px solid var(--border);border-radius:14px;padding:16px 18px;animation:fadeUp .3s;}
 @keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
 .msg.scripture {border-left:4px solid var(--gold);}
 .msg.discussion{border-left:4px solid #5B8BF5;}
 .msg.prayer    {border-left:4px solid #7BAD85;}
@@ -295,6 +301,20 @@ textarea.txt-input{resize:vertical;min-height:78px;line-height:1.6;}
             <div style="height:1px;flex:1;background:var(--border);"></div>
           </div>
 
+          <!-- Verse lookup via Supabase Edge Function -->
+          <div style="margin-bottom:10px;">
+            <div style="display:flex;gap:8px;">
+              <input class="txt-input" id="verse-search" placeholder="Look up any reference… (e.g. John 3:16)" style="margin-bottom:0;flex:1;" onkeydown="if(event.key==='Enter')fetchVerse()">
+              <button class="btn-sm" id="verse-fetch-btn" onclick="fetchVerse()" style="white-space:nowrap;flex-shrink:0;">Lookup →</button>
+            </div>
+            <div id="verse-fetch-status" style="font-size:.75rem;color:var(--muted);margin-top:5px;min-height:16px;"></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+            <div style="height:1px;flex:1;background:var(--border);"></div>
+            <span style="font-size:.72rem;color:var(--muted);font-weight:600;">or pick a preset</span>
+            <div style="height:1px;flex:1;background:var(--border);"></div>
+          </div>
+
           <label class="toggle-row">
             <label class="toggle"><input type="checkbox" id="custom-chk" onchange="toggleCustom()"><span class="tslider"></span></label>
             <span style="font-size:.84rem;color:var(--muted);font-weight:600;">Enter verse text manually</span>
@@ -311,6 +331,23 @@ textarea.txt-input{resize:vertical;min-height:78px;line-height:1.6;}
             <div class="verse-ref"  id="preview-ref"></div>
           </div>
           <textarea class="txt-input" id="scripture-note" placeholder="Add a note or reflection (optional)…" rows="2"></textarea>
+        </div>
+
+
+        <!-- Live Audio Panel -->
+        <div id="panel-live" style="display:none;padding:4px 0;">
+          <div style="background:var(--navy3);border:1px solid var(--border);border-radius:12px;padding:20px;text-align:center;">
+            <div id="live-status-dot" style="width:14px;height:14px;border-radius:50%;background:#ef4444;margin:0 auto 10px;opacity:.3;"></div>
+            <div id="live-status-text" style="font-size:.9rem;font-weight:700;color:var(--muted);margin-bottom:6px;">Not Broadcasting</div>
+            <div id="live-status-sub" style="font-size:.75rem;color:var(--muted);margin-bottom:20px;">Tap Go Live to start streaming your mic to members</div>
+            <button id="live-btn" class="btn-gold" style="width:100%;justify-content:center;font-size:1rem;padding:14px;" onclick="toggleLive()">🎙️ Go Live</button>
+            <div id="live-error" style="font-size:.75rem;color:#ef4444;margin-top:10px;min-height:16px;"></div>
+          </div>
+          <div style="margin-top:14px;background:var(--navy3);border:1px solid var(--border);border-radius:10px;padding:14px;">
+            <div style="font-size:.78rem;font-weight:700;color:var(--muted);margin-bottom:8px;">STREAM INFO</div>
+            <div style="font-size:.8rem;color:var(--text);">Members will see a Live banner in their feed and can tap to listen.</div>
+            <div style="font-size:.75rem;color:var(--muted);margin-top:6px;">Stream ends automatically when you leave this tab.</div>
+          </div>
         </div>
 
         <!-- Discussion -->
@@ -421,7 +458,7 @@ textarea.txt-input{resize:vertical;min-height:78px;line-height:1.6;}
 <script>
 // === STATE ===
 var mode='', userName='', roomKey=null, sbClient=null, sbChannel=null;
-var currentType='scripture', currentTrans='KJV', useCustom=false;
+var currentType='scripture', currentTrans='NIV', useCustom=false;
 var allPosts=[], lastSeen=0;
 
 // === INIT ===
@@ -836,6 +873,114 @@ async function confirmDeleteAll(){
   toast('All posts deleted');
 }
 
+
+// === LIVE AUDIO ===
+var mediaRecorder=null, liveStream=null, liveActive=false;
+var liveCheckInterval=null;
+
+async function toggleLive(){
+  if(liveActive){ stopLive(); return; }
+  await startLive();
+}
+
+async function startLive(){
+  var errEl=id('live-error');
+  errEl.textContent='';
+  try{
+    liveStream=await navigator.mediaDevices.getUserMedia({audio:true,video:false});
+    // Connect to Icecast via WebSocket/fetch stream
+    var mimeType='audio/webm;codecs=opus';
+    if(!MediaRecorder.isTypeSupported(mimeType)) mimeType='audio/webm';
+    mediaRecorder=new MediaRecorder(liveStream,{mimeType:mimeType,audioBitsPerSecond:64000});
+
+    var icecastUrl=WL.ICECAST_URL||WL.STREAM_URL.replace('/radio.mp3','/radio/8000/radio.mp3');
+    var auth='source:'+WL.ICECAST_PASS;
+    var b64=btoa(auth);
+
+    mediaRecorder.ondataavailable=async function(e){
+      if(e.data.size>0){
+        try{
+          await fetch(icecastUrl,{
+            method:'PUT',
+            headers:{
+              'Authorization':'Basic '+b64,
+              'Content-Type':mimeType,
+              'Transfer-Encoding':'chunked'
+            },
+            body:e.data,
+            duplex:'half'
+          });
+        }catch(err){ console.warn('Chunk send error:',err); }
+      }
+    };
+
+    mediaRecorder.start(1000); // send chunk every second
+    liveActive=true;
+
+    // Update UI
+    id('live-status-dot').style.opacity='1';
+    id('live-status-text').textContent='Broadcasting Live';
+    id('live-status-sub').textContent='Members can now hear you. Tap Stop to end.';
+    id('live-btn').textContent='⏹ Stop Broadcasting';
+    id('live-btn').style.background='linear-gradient(135deg,#ef4444,#dc2626)';
+
+    // Notify members via Supabase (post a live marker)
+    if(sbClient){
+      var enc=await encryptMsg(JSON.stringify({type:'__live__',url:WL.STREAM_URL,from:userName}));
+      await sbClient.from('wp_messages').insert({tenant:tenantId(),payload:enc});
+    }
+
+  }catch(e){
+    errEl.textContent='Could not access microphone: '+e.message;
+    console.error('Live error:',e);
+  }
+}
+
+function stopLive(){
+  if(mediaRecorder){ mediaRecorder.stop(); mediaRecorder=null; }
+  if(liveStream){ liveStream.getTracks().forEach(function(t){t.stop()}); liveStream=null; }
+  liveActive=false;
+  id('live-status-dot').style.opacity='.3';
+  id('live-status-text').textContent='Not Broadcasting';
+  id('live-status-sub').textContent='Tap Go Live to start streaming your mic to members';
+  id('live-btn').textContent='🎙️ Go Live';
+  id('live-btn').style.background='';
+  // Post stop marker
+  if(sbClient){
+    encryptMsg(JSON.stringify({type:'__live_stop__',from:userName})).then(function(enc){
+      sbClient.from('wp_messages').insert({tenant:tenantId(),payload:enc});
+    });
+  }
+}
+
+// Member side
+function toggleMemberAudio(){
+  var audio=id('member-audio');
+  var btn=id('member-audio-btn');
+  if(audio.paused){
+    audio.src=WL.STREAM_URL+'?t='+Date.now();
+    audio.play();
+    btn.textContent='⏸ Pause';
+  } else {
+    audio.pause();
+    btn.textContent='▶ Listen';
+  }
+}
+
+function handleLiveMessage(msg){
+  if(msg.type==='__live__'){
+    var bar=id('live-player-bar');
+    id('member-audio').src=msg.url||WL.STREAM_URL;
+    bar.style.display='flex';
+  } else if(msg.type==='__live_stop__'){
+    var bar=id('live-player-bar');
+    bar.style.display='none';
+    var audio=id('member-audio');
+    audio.pause();
+    audio.src='';
+  }
+}
+
 // === VERSES ===
 var VERSES={
   KJV:{
@@ -896,6 +1041,55 @@ var VERSES={
   }
 };
 var REFS=Object.keys(VERSES.NIV);
+
+// === BIBLE LOOKUP via Supabase Edge Function ===
+async function fetchVerse(){
+  var query=id('verse-search').value.trim();
+  var status=id('verse-fetch-status');
+  var btn=id('verse-fetch-btn');
+
+  if(!query){ status.textContent='Enter a reference first.'; return; }
+
+  btn.disabled=true;
+  btn.textContent='Loading…';
+  status.textContent='';
+  status.style.color='var(--muted)';
+
+  try{
+    var fnUrl=WL.SUPABASE_URL+'/functions/v1/bible-lookup';
+    var resp=await fetch(fnUrl,{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'Authorization':'Bearer '+WL.SUPABASE_ANON
+      },
+      body:JSON.stringify({reference:query, translation:currentTrans})
+    });
+    var data=await resp.json();
+
+    if(data.text && data.reference){
+      useCustom=true;
+      id('custom-chk').checked=true;
+      id('preset-wrap').style.display='none';
+      id('custom-wrap').style.display='block';
+      id('cust-ref').value=data.reference;
+      id('cust-text').value=data.text;
+      updatePreview();
+      status.textContent='✓ '+data.reference+' ('+data.translation+')';
+      status.style.color='var(--safe)';
+    } else {
+      status.textContent=data.error||'Verse not found. Check reference and try again.';
+      status.style.color='#ef4444';
+    }
+  } catch(e){
+    console.error('Bible lookup error:',e);
+    status.textContent='Lookup failed -- enter verse text manually below.';
+    status.style.color='#ef4444';
+  }
+
+  btn.disabled=false;
+  btn.textContent='Lookup →';
+}
 
 function buildVerseUI(){
   var tr=id('trans-row');tr.innerHTML='';
@@ -1096,6 +1290,7 @@ CREATE POLICY "anon delete" ON wp_messages FOR DELETE USING (true);
 
 </body>
 </html>
+
 
 
 
