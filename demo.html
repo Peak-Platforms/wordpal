@@ -613,12 +613,8 @@ function launchApp(){
   if(mode==='leader'){
     id('leader-name').value=userName;
     switchTab('post',document.querySelector('#leader-tabs .tab-btn'));
-    id('tab-post').classList.add('active');
-    id('tab-feed').classList.remove('active');
   } else {
     switchTab('feed',document.querySelector('#member-tabs .tab-btn'));
-    id('tab-post').classList.remove('active');
-    id('tab-feed').classList.add('active');
   }
 
   loadFeed();
@@ -1310,7 +1306,6 @@ CREATE POLICY "anon delete" ON wp_messages FOR DELETE USING (true);
 
 </body>
 </html>
-
 
 
 
