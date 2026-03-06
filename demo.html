@@ -909,24 +909,17 @@ async function startLive(){
     if(!MediaRecorder.isTypeSupported(mimeType)) mimeType='audio/webm';
     mediaRecorder=new MediaRecorder(liveStream,{mimeType:mimeType,audioBitsPerSecond:64000});
 
-    var icecastUrl=WL.ICECAST_URL||WL.STREAM_URL.replace('/radio.mp3','/radio/8000/radio.mp3');
-    var auth='source:'+WL.ICECAST_PASS;
-    var b64=btoa(auth);
+    // Use WebSocket relay on our own server to pipe audio to Icecast
+    var wsProto=location.protocol==='https:'?'wss:':'ws:';
+    var wsUrl=wsProto+'//'+location.host+'/broadcast';
+    var audioWs=new WebSocket(wsUrl);
 
-    mediaRecorder.ondataavailable=async function(e){
-      if(e.data.size>0){
-        try{
-          await fetch(icecastUrl,{
-            method:'PUT',
-            headers:{
-              'Authorization':'Basic '+b64,
-              'Content-Type':mimeType,
-              'Transfer-Encoding':'chunked'
-            },
-            body:e.data,
-            duplex:'half'
-          });
-        }catch(err){ console.warn('Chunk send error:',err); }
+    audioWs.onopen=function(){ console.log('Audio relay connected'); };
+    audioWs.onerror=function(e){ console.warn('Audio WS error:',e); };
+
+    mediaRecorder.ondataavailable=function(e){
+      if(e.data.size>0 && audioWs.readyState===WebSocket.OPEN){
+        audioWs.send(e.data);
       }
     };
 
@@ -954,6 +947,7 @@ async function startLive(){
 
 function stopLive(){
   if(mediaRecorder){ mediaRecorder.stop(); mediaRecorder=null; }
+  if(typeof audioWs!=='undefined'&&audioWs){ audioWs.close(); audioWs=null; }
   if(liveStream){ liveStream.getTracks().forEach(function(t){t.stop()}); liveStream=null; }
   liveActive=false;
   id('live-status-dot').style.opacity='.3';
@@ -1310,12 +1304,3 @@ CREATE POLICY "anon delete" ON wp_messages FOR DELETE USING (true);
 
 </body>
 </html>
-
-
-
-
-
-
-
-
-
