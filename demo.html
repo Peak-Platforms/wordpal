@@ -783,7 +783,7 @@ async function loadFeed(){
           text:'And let us consider how we may spur one another on toward love and good deeds.',
           trans:'NIV'
         },
-        note:'Last week\' theme — we are not meant to do this alone.'
+        note:'Last week - we are not meant to do this alone.'
       }
     ];
   }
@@ -982,8 +982,10 @@ function toggleMemberAudio(){
 }
 
 function handleLiveMessage(msg){
+  console.log('handleLiveMessage called:', msg.type);
   if(msg.type==='__live__'){
     var bar=id('live-player-bar');
+    if(!bar){console.error('live-player-bar not found');return;}
     id('member-audio').src=msg.url||WL.STREAM_URL;
     bar.style.display='flex';
   } else if(msg.type==='__live_stop__'){
