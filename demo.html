@@ -718,7 +718,7 @@ async function loadFeed(){
       if(obj){obj._id=row.id;obj._at=row.created_at;obj._new=false;}
       return obj;
     }));
-    allPosts=decrypted.filter(Boolean);
+    allPosts=decrypted.filter(function(o){return o&&(!o.type||!o.type.startsWith('__live'));});
   }catch(e){
     console.warn('Load failed:',e);
   }
