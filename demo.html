@@ -377,6 +377,17 @@ textarea.txt-input{resize:vertical;min-height:78px;line-height:1.6;}
 
     <!-- ── FEED TAB (leader + member) ── -->
     <div id="tab-feed" class="section">
+      <!-- Live Audio Player Bar -->
+      <div id="live-player-bar" style="display:none;background:linear-gradient(135deg,#7B2D2D,#C8922A);border-radius:10px;padding:12px 16px;margin-bottom:12px;align-items:center;gap:12px;">
+        <div style="width:10px;height:10px;border-radius:50%;background:#ff4444;animation:pulse 1s infinite;flex-shrink:0;"></div>
+        <div style="flex:1;">
+          <div style="font-size:.85rem;font-weight:700;color:#fff;">Live Now</div>
+          <div style="font-size:.72rem;color:rgba(255,255,255,.7);">Your leader is broadcasting</div>
+        </div>
+        <button onclick="toggleMemberAudio()" id="member-audio-btn" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);border-radius:8px;color:#fff;font-size:.8rem;font-weight:700;padding:7px 14px;cursor:pointer;">▶ Listen</button>
+        <audio id="member-audio" src=""></audio>
+      </div>
+
       <div id="feed-loading" class="empty-state">
         <div class="empty-icon">🔒</div>
         <div>Loading encrypted messages…</div>
@@ -933,8 +944,8 @@ async function startLive(){
 
     // Notify members via Supabase (post a live marker)
     if(sbClient){
-      var enc=await enc(JSON.stringify({type:'__live__',url:WL.STREAM_URL,from:userName}));
-      await sbClient.from('wp_messages').insert({tenant:tenantId(),payload:enc});
+      var livePayload=await enc(JSON.stringify({type:'__live__',url:WL.STREAM_URL,from:userName}));
+      await sbClient.from('wp_messages').insert({tenant:tenantId(),payload:livePayload});
     }
 
   }catch(e){
@@ -954,8 +965,8 @@ function stopLive(){
   id('live-btn').style.background='';
   // Post stop marker
   if(sbClient){
-    enc(JSON.stringify({type:'__live_stop__',from:userName})).then(function(enc){
-      sbClient.from('wp_messages').insert({tenant:tenantId(),payload:enc});
+    enc(JSON.stringify({type:'__live_stop__',from:userName})).then(function(stopPayload){
+      sbClient.from('wp_messages').insert({tenant:tenantId(),payload:stopPayload});
     });
   }
 }
@@ -1299,6 +1310,7 @@ CREATE POLICY "anon delete" ON wp_messages FOR DELETE USING (true);
 
 </body>
 </html>
+
 
 
 
