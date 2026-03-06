@@ -942,7 +942,7 @@ async function startLive(){
 
     // Notify members via Supabase (post a live marker)
     if(sbClient){
-      var livePayload=await enc(JSON.stringify({type:'__live__',url:WL.STREAM_URL,from:userName}));
+      var livePayload=await enc({type:'__live__',url:WL.STREAM_URL,from:userName});
       await sbClient.from('wp_messages').insert({tenant:tenantId(),payload:livePayload});
     }
 
@@ -963,7 +963,7 @@ function stopLive(){
   id('live-btn').style.background='';
   // Post stop marker
   if(sbClient){
-    enc(JSON.stringify({type:'__live_stop__',from:userName})).then(function(stopPayload){
+    enc({type:'__live_stop__',from:userName}).then(function(stopPayload){
       sbClient.from('wp_messages').insert({tenant:tenantId(),payload:stopPayload});
     });
   }
@@ -1310,6 +1310,7 @@ CREATE POLICY "anon delete" ON wp_messages FOR DELETE USING (true);
 
 </body>
 </html>
+
 
 
 
