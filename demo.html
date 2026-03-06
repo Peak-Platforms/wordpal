@@ -952,6 +952,7 @@ async function fetchVerse(){
     }
 
     var searchData=await searchResp.json();
+    console.log('Search response:',JSON.stringify(searchData).slice(0,500));
     var verses=searchData.data&&searchData.data.verses;
 
     if(verses&&verses.length>0){
@@ -1199,4 +1200,5 @@ CREATE POLICY "anon delete" ON wp_messages FOR DELETE USING (true);
 
 </body>
 </html>
+
 
