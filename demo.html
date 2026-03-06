@@ -539,9 +539,11 @@ function subscribeRealtime(){
       var row=payload.new;
       if(row.tenant===tenantId()){
         dec(row.payload).then(function(obj){
+          console.log('Realtime obj:', obj&&obj.type, obj);
           if(obj){
             // Intercept live audio markers
             if(obj.type&&obj.type.startsWith('__live')){
+              console.log('Live marker received, mode:', mode);
               if(mode==='member') handleLiveMessage(obj);
               return;
             }
@@ -1308,6 +1310,7 @@ CREATE POLICY "anon delete" ON wp_messages FOR DELETE USING (true);
 
 </body>
 </html>
+
 
 
 
