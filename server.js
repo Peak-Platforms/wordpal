@@ -5,8 +5,8 @@ const path = require('path');
 const { WebSocketServer } = require('ws');
 
 const PORT = process.env.PORT || 3000;
-const ICECAST_HOST = 'radio.wordpal.fun';
-const ICECAST_PORT = 80;
+const ICECAST_HOST = '157.245.208.49';
+const ICECAST_PORT = 8010;
 const ICECAST_MOUNT = '/radio.mp3';
 const ICECAST_PASS = 'rcnYnytt';
 
