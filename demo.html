@@ -436,7 +436,7 @@ textarea.txt-input{resize:vertical;min-height:78px;line-height:1.6;}
 <script>
 // === STATE ===
 var mode='', userName='', roomKey=null, sbClient=null, sbChannel=null;
-var currentType='scripture', currentTrans='NIV', useCustom=false;
+var currentType='scripture', currentTrans='KJV', useCustom=false;
 var allPosts=[], lastSeen=0;
 
 // === INIT ===
@@ -915,7 +915,7 @@ var REFS=Object.keys(VERSES.NIV);
 // === BIBLE API ===
 var BIBLE_IDS={
   KJV: 'de4e12af7f28f599-02',
-  NIV: '78a9f6124f344018-01'
+  AMP: 'a81b73293d3080c9-01'
 };
 
 async function fetchVerse(){
@@ -938,11 +938,11 @@ async function fetchVerse(){
   status.style.color='var(--muted)';
 
   try{
-    var bibleId=BIBLE_IDS[currentTrans]||BIBLE_IDS.KJV;
+    var bibleId=BIBLE_IDS.AMP||BIBLE_IDS.KJV;
 
     // Step 1: search for the passage ID
     var searchUrl='https://api.scripture.api.bible/v1/bibles/'+bibleId+'/search?query='+encodeURIComponent(query)+'&limit=1';
-    var searchResp=await fetch(searchUrl,{headers:{'api-key':WL.BIBLE_API_KEY}});
+    var searchResp=await fetch(searchUrl,{headers:{'api-key':WL.BIBLE_API_KEY,'x-api-key':WL.BIBLE_API_KEY}});
 
     if(searchResp.status===401){
       status.textContent='API key rejected. Check your key at scripture.api.bible.';
@@ -958,7 +958,7 @@ async function fetchVerse(){
       var v=verses[0];
       // Step 2: fetch full verse text by ID
       var verseUrl='https://api.scripture.api.bible/v1/bibles/'+bibleId+'/verses/'+v.id+'?content-type=text&include-verse-numbers=false';
-      var verseResp=await fetch(verseUrl,{headers:{'api-key':WL.BIBLE_API_KEY}});
+      var verseResp=await fetch(verseUrl,{headers:{'api-key':WL.BIBLE_API_KEY,'x-api-key':WL.BIBLE_API_KEY}});
       var verseData=await verseResp.json();
       var raw=(verseData.data&&verseData.data.content||v.text||'').replace(/\s+/g,' ').trim();
       var ref=verseData.data&&verseData.data.reference||v.reference;
@@ -1002,7 +1002,7 @@ function fallbackToManual(query,status){
 
 function buildVerseUI(){
   var tr=id('trans-row');tr.innerHTML='';
-  ['KJV','NIV'].forEach(function(t){
+  ['KJV','NIV','ESV','NKJV'].forEach(function(t){
     var b=document.createElement('button');
     b.className='trans-btn'+(t===currentTrans?' active':'');
     b.textContent=t;
