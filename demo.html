@@ -334,23 +334,6 @@ textarea.txt-input{resize:vertical;min-height:78px;line-height:1.6;}
           <textarea class="txt-input" id="scripture-note" placeholder="Add a note or reflection (optional)…" rows="2"></textarea>
         </div>
 
-
-        <!-- Live Audio Panel -->
-        <div id="panel-live" style="display:none;padding:4px 0;">
-          <div style="background:var(--navy3);border:1px solid var(--border);border-radius:12px;padding:20px;text-align:center;">
-            <div id="live-status-dot" style="width:14px;height:14px;border-radius:50%;background:#ef4444;margin:0 auto 10px;opacity:.3;"></div>
-            <div id="live-status-text" style="font-size:.9rem;font-weight:700;color:var(--muted);margin-bottom:6px;">Not Broadcasting</div>
-            <div id="live-status-sub" style="font-size:.75rem;color:var(--muted);margin-bottom:20px;">Tap Go Live to start streaming your mic to members</div>
-            <button id="live-btn" class="btn-gold" style="width:100%;justify-content:center;font-size:1rem;padding:14px;" onclick="toggleLive()">🎙️ Go Live</button>
-            <div id="live-error" style="font-size:.75rem;color:#ef4444;margin-top:10px;min-height:16px;"></div>
-          </div>
-          <div style="margin-top:14px;background:var(--navy3);border:1px solid var(--border);border-radius:10px;padding:14px;">
-            <div style="font-size:.78rem;font-weight:700;color:var(--muted);margin-bottom:8px;">STREAM INFO</div>
-            <div style="font-size:.8rem;color:var(--text);">Members will see a Live banner in their feed and can tap to listen.</div>
-            <div style="font-size:.75rem;color:var(--muted);margin-top:6px;">Stream ends automatically when you leave this tab.</div>
-          </div>
-        </div>
-
         <!-- Discussion -->
         <div id="panel-discussion" style="display:none;">
           <textarea class="txt-input" id="disc-text" placeholder="Type your discussion question for the group…" rows="4"></textarea>
@@ -370,6 +353,24 @@ textarea.txt-input{resize:vertical;min-height:78px;line-height:1.6;}
         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:4px;">
           <button class="btn-gold" onclick="postMessage()" id="post-btn">🔒 Post Encrypted</button>
           <span id="post-ok" style="display:none;font-size:.78rem;color:var(--safe);font-weight:600;">✓ Posted</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── LIVE TAB (leader only) ── -->
+    <div id="tab-live" class="section" style="display:none;">
+      <div class="card">
+        <div class="card-heading">Live Audio Broadcast</div>
+        <div style="text-align:center;padding:10px 0;">
+          <div id="live-status-dot" style="width:16px;height:16px;border-radius:50%;background:#ef4444;margin:0 auto 12px;opacity:.3;transition:opacity .3s;"></div>
+          <div id="live-status-text" style="font-size:1rem;font-weight:700;color:var(--muted);margin-bottom:6px;">Not Broadcasting</div>
+          <div id="live-status-sub" style="font-size:.8rem;color:var(--muted);margin-bottom:24px;">Tap Go Live to stream your mic to members in real time.</div>
+          <button id="live-btn" class="btn-gold" style="width:100%;justify-content:center;font-size:1rem;padding:14px;" onclick="toggleLive()">🎙️ Go Live</button>
+          <div id="live-error" style="font-size:.75rem;color:#ef4444;margin-top:10px;min-height:16px;"></div>
+        </div>
+        <div style="margin-top:16px;background:var(--navy3);border:1px solid var(--border);border-radius:10px;padding:14px;">
+          <div style="font-size:.78rem;font-weight:700;color:var(--muted);margin-bottom:6px;">STREAM INFO</div>
+          <div style="font-size:.8rem;color:var(--text);line-height:1.6;">Members will see a Live banner in their feed and can tap to listen. The stream ends automatically when you leave this tab or close the app.</div>
         </div>
       </div>
     </div>
@@ -1261,15 +1262,8 @@ function setType(t,btn){
 }
 function switchTab(name,btn){
   // Hide all panels
-  ['post','feed','manage','live','notify'].forEach(function(t){
-    var p=id('panel-'+t); if(p) p.style.display='none';
-  });
-  // Also handle section-based tabs
-  document.querySelectorAll('.section').forEach(function(s){s.classList.remove('active');});
-  var el=id('tab-'+name);if(el)el.classList.add('active');
-  // Show target panel
-  var panel=id('panel-'+name);
-  if(panel) panel.style.display='block';
+  document.querySelectorAll('.section').forEach(function(s){s.style.display='none';s.classList.remove('active');});
+  var el=id('tab-'+name);if(el){el.style.display='block';el.classList.add('active');}
   // Update tab button active state
   document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active');});
   if(btn)btn.classList.add('active');
@@ -1300,6 +1294,7 @@ CREATE POLICY "anon delete" ON wp_messages FOR DELETE USING (true);
 
 </body>
 </html>
+
 
 
 
