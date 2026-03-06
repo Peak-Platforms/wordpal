@@ -529,6 +529,11 @@ function subscribeRealtime(){
       if(row.tenant===tenantId()){
         dec(row.payload).then(function(obj){
           if(obj){
+            // Intercept live audio markers
+            if(obj.type&&obj.type.startsWith('__live')){
+              if(mode==='member') handleLiveMessage(obj);
+              return;
+            }
             obj._id=row.id;obj._at=row.created_at;obj._new=true;
             allPosts.unshift(obj);
             renderFeed();
@@ -928,7 +933,7 @@ async function startLive(){
 
     // Notify members via Supabase (post a live marker)
     if(sbClient){
-      var enc=await encryptMsg(JSON.stringify({type:'__live__',url:WL.STREAM_URL,from:userName}));
+      var enc=await enc(JSON.stringify({type:'__live__',url:WL.STREAM_URL,from:userName}));
       await sbClient.from('wp_messages').insert({tenant:tenantId(),payload:enc});
     }
 
@@ -949,7 +954,7 @@ function stopLive(){
   id('live-btn').style.background='';
   // Post stop marker
   if(sbClient){
-    encryptMsg(JSON.stringify({type:'__live_stop__',from:userName})).then(function(enc){
+    enc(JSON.stringify({type:'__live_stop__',from:userName})).then(function(enc){
       sbClient.from('wp_messages').insert({tenant:tenantId(),payload:enc});
     });
   }
@@ -1294,6 +1299,7 @@ CREATE POLICY "anon delete" ON wp_messages FOR DELETE USING (true);
 
 </body>
 </html>
+
 
 
 
