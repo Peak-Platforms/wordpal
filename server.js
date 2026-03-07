@@ -1,35 +1,39 @@
 const http = require('http');
-const https = require('https');
 const fs = require('fs');
 const path = require('path');
 const { WebSocketServer } = require('ws');
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8080;
+
+// Icecast / AzuraCast settings
 const ICECAST_HOST = '157.245.208.49';
-const ICECAST_PORT = 8015;
-const ICECAST_MOUNT = '/';
-const ICECAST_USER = 'wordpal';
-const ICECAST_PASS = 'broadcast2025';
+const ICECAST_PORT = 8010;
+const ICECAST_MOUNT = '/live';
+const ICECAST_USER = 'source';
+const ICECAST_PASS = 'rcnYnytt';
 
 // MIME types for static files
 const MIME = {
   '.html': 'text/html',
-  '.js':   'application/javascript',
-  '.css':  'text/css',
-  '.png':  'image/png',
-  '.ico':  'image/x-icon',
+  '.js': 'application/javascript',
+  '.css': 'text/css',
+  '.png': 'image/png',
+  '.ico': 'image/x-icon'
 };
 
-// Create HTTP server for static files
+// -----------------------------
+// HTTP SERVER (serves frontend)
+// -----------------------------
 const server = http.createServer((req, res) => {
   let filePath = req.url === '/' ? '/index.html' : req.url;
-  // Strip query strings
   filePath = filePath.split('?')[0];
+
   let fullPath = path.join(__dirname, filePath);
-  // Try adding .html if no extension and file doesn't exist
-  if (!path.extname(fullPath) && !require('fs').existsSync(fullPath)) {
-    fullPath = fullPath + '.html';
+
+  if (!path.extname(fullPath) && !fs.existsSync(fullPath)) {
+    fullPath += '.html';
   }
+
   const ext = path.extname(fullPath);
 
   fs.readFile(fullPath, (err, data) => {
@@ -38,63 +42,82 @@ const server = http.createServer((req, res) => {
       res.end('Not found');
       return;
     }
+
     res.writeHead(200, { 'Content-Type': MIME[ext] || 'text/plain' });
     res.end(data);
   });
 });
 
-// WebSocket server for audio relay
+// -----------------------------
+// WEBSOCKET SERVER (audio relay)
+// -----------------------------
 const wss = new WebSocketServer({ server, path: '/broadcast' });
 
 wss.on('connection', (ws) => {
-  console.log('Leader connected — opening Icecast connection');
 
-  const auth = Buffer.from(`${ICECAST_USER}:${ICECAST_PASS}`).toString('base64');
+  console.log('Leader connected — starting Icecast stream');
 
-  // Open persistent connection to Icecast
-  const iceReq = http.request({
+  const auth = Buffer
+    .from(`${ICECAST_USER}:${ICECAST_PASS}`)
+    .toString('base64');
+
+  const options = {
     hostname: ICECAST_HOST,
     port: ICECAST_PORT,
     path: ICECAST_MOUNT,
-    method: 'PUT',
+    method: 'SOURCE',
     headers: {
       'Authorization': `Basic ${auth}`,
       'Content-Type': 'audio/webm;codecs=opus',
-      'Transfer-Encoding': 'chunked',
       'Ice-Name': 'WordPal Live',
+      'Ice-Description': 'WordPal Live Broadcast',
       'Ice-Public': '0',
-      'Ice-Audio-Info': 'bitrate=64',
-      'Expect': '100-continue',
+      'Ice-Audio-Info': 'bitrate=64'
     }
-  }, (res) => {
+  };
+
+  const iceReq = http.request(options, (res) => {
     console.log('Icecast response:', res.statusCode);
+
+    if (res.statusCode !== 200) {
+      console.error('Icecast rejected stream');
+      ws.close();
+    }
   });
 
-  iceReq.on('error', (e) => {
-    console.error('Icecast error:', e.message);
-    ws.send(JSON.stringify({ error: e.message }));
+  iceReq.on('error', (err) => {
+    console.error('Icecast connection error:', err.message);
+    ws.close();
   });
 
   // Relay audio chunks from browser to Icecast
   ws.on('message', (data) => {
     try {
       iceReq.write(data);
-    } catch(e) {
-      console.error('Write error:', e.message);
+    } catch (err) {
+      console.error('Write error:', err.message);
     }
   });
 
   ws.on('close', () => {
-    console.log('Leader disconnected — closing Icecast connection');
-    try { iceReq.end(); } catch(e) {}
+    console.log('Leader disconnected — ending Icecast stream');
+    try {
+      iceReq.end();
+    } catch {}
   });
 
-  ws.on('error', (e) => {
-    console.error('WebSocket error:', e.message);
-    try { iceReq.end(); } catch(e) {}
+  ws.on('error', (err) => {
+    console.error('WebSocket error:', err.message);
+    try {
+      iceReq.end();
+    } catch {}
   });
+
 });
 
+// -----------------------------
+// START SERVER
+// -----------------------------
 server.listen(PORT, () => {
   console.log(`WordPal server running on port ${PORT}`);
 });
