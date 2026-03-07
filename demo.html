@@ -20,24 +20,14 @@ var WL = {
   DARK_MODE:      true,
   POWERED_BY:     true,
 
-  // Supabase -- shared demo instance
   SUPABASE_URL:   "https://ggvtxauxjkixszvyirsl.supabase.co",
   SUPABASE_ANON:  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdndnR4YXV4amtpeHN6dnlpcnNsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2NDYyMDcsImV4cCI6MjA4ODIyMjIwN30.XEzPwh7-BYc7FnfU21AvXExQjhd-6UwJ4G8og3dYqaY",
 
-  // Shared room key for demo
   ROOM_KEY:       "wordpal-demo-2025-live-preview-ok!",
-
-  // Demo PINs -- shared openly since this is a public demo
   LEADER_PIN:     "1234",
   MEMBER_PIN:     "1111",
 
-  // Web Push
-  VAPID_PUBLIC_KEY: "BAewQQaMhRp6wQOxrxZg7dfAuZRBECeZDG5jW8DHMB4JgtZF9w_SMDs8Tk2vgv8DQsmY2mljEkYDVEQdsrLeJzY",
-
-  // Live Audio -- AzuraCast
-  STREAM_URL:    "https://radio.wordpal.fun/live.mp3",
-  ICECAST_URL:   "https://radio.wordpal.fun/listen/wordpal/radio.mp3",
-  ICECAST_PASS:  "rcnYnytt"
+  VAPID_PUBLIC_KEY: "BAewQQaMhRp6wQOxrxZg7dfAuZRBECeZDG5jW8DHMB4JgtZF9w_SMDs8Tk2vgv8DQsmY2mljEkYDVEQdsrLeJzY"
 };
 </script>
 <!-- ============================================================ -->
@@ -138,7 +128,6 @@ textarea.txt-input{resize:vertical;min-height:78px;line-height:1.6;}
 .feed{display:flex;flex-direction:column;gap:14px;}
 .msg{background:var(--navy3);border:1px solid var(--border);border-radius:14px;padding:16px 18px;animation:fadeUp .3s;}
 @keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
-@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
 .msg.scripture {border-left:4px solid var(--gold);}
 .msg.discussion{border-left:4px solid #5B8BF5;}
 .msg.prayer    {border-left:4px solid #7BAD85;}
@@ -156,8 +145,6 @@ textarea.txt-input{resize:vertical;min-height:78px;line-height:1.6;}
 .msg-ref{font-size:.82rem;font-weight:700;color:var(--gold);}
 .msg-body{font-size:.93rem;color:var(--text);line-height:1.65;}
 .msg-actions{margin-top:10px;padding-top:10px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;}
-
-/* NEW badge */
 .new-badge{font-size:.68rem;background:rgba(34,197,94,.15);color:var(--safe);border:1px solid rgba(34,197,94,.3);border-radius:4px;padding:1px 6px;font-weight:700;}
 
 /* EMPTY / LOADING */
@@ -231,7 +218,6 @@ textarea.txt-input{resize:vertical;min-height:78px;line-height:1.6;}
   <div class="gate-card">
     <div style="font-size:2.2rem;margin-bottom:12px;">🎛</div>
     <div style="font-family:'Playfair Display',serif;font-size:1.45rem;margin-bottom:4px;">Leader Access</div>
-    <div style="font-size:.8rem;color:var(--muted);margin-bottom:4px;" class="wl-tag"></div>
     <div class="gate-enc">🔒 Leader PIN required.</div>
     <input class="txt-input" id="lg-name" placeholder="Your name (e.g. Pastor John)" style="margin-bottom:10px;">
     <input class="txt-input" id="lg-pin" type="password" inputmode="numeric" maxlength="12" placeholder="Leader PIN" style="text-align:center;letter-spacing:.2em;margin-bottom:6px;" onkeydown="if(event.key==='Enter')submitGate('leader')">
@@ -248,7 +234,6 @@ textarea.txt-input{resize:vertical;min-height:78px;line-height:1.6;}
   <div class="gate-card">
     <div style="font-size:2.2rem;margin-bottom:12px;">📖</div>
     <div style="font-family:'Playfair Display',serif;font-size:1.45rem;margin-bottom:4px;" class="wl-name">WordPal</div>
-    <div style="font-size:.8rem;color:var(--muted);margin-bottom:4px;" class="wl-tag"></div>
     <div class="gate-enc">🔒 Messages are end-to-end encrypted. Only members of this group can read them.</div>
     <input class="txt-input" id="mg-name" placeholder="Your name (e.g. John Smith)" style="margin-bottom:10px;">
     <input class="txt-input" id="mg-pin" type="password" inputmode="numeric" maxlength="12" placeholder="Group PIN" style="text-align:center;letter-spacing:.2em;margin-bottom:6px;" onkeydown="if(event.key==='Enter')submitGate('member')">
@@ -273,7 +258,6 @@ textarea.txt-input{resize:vertical;min-height:78px;line-height:1.6;}
     <button class="tab-btn active" onclick="switchTab('post',this)">✏️ Post</button>
     <button class="tab-btn" onclick="switchTab('feed',this)">📋 All Posts</button>
     <button class="tab-btn" onclick="switchTab('manage',this)">⚙️ Manage</button>
-    <button class="tab-btn" onclick="switchTab('live',this)">🔴 Live</button>
   </div>
 
   <!-- MEMBER TABS -->
@@ -298,24 +282,6 @@ textarea.txt-input{resize:vertical;min-height:78px;line-height:1.6;}
         <!-- Scripture -->
         <div id="panel-scripture">
           <div class="trans-row" id="trans-row"></div>
-          <span style="font-size:.72rem;color:var(--muted);font-weight:600;">or pick a preset</span>
-            <div style="height:1px;flex:1;background:var(--border);"></div>
-          </div>
-
-          <!-- Verse lookup via Supabase Edge Function -->
-          <div style="margin-bottom:10px;">
-            <div style="display:flex;gap:8px;">
-              <input class="txt-input" id="verse-search" placeholder="Look up any reference… (e.g. John 3:16)" style="margin-bottom:0;flex:1;" onkeydown="if(event.key==='Enter')fetchVerse()">
-              <button class="btn-sm" id="verse-fetch-btn" onclick="fetchVerse()" style="white-space:nowrap;flex-shrink:0;">Lookup →</button>
-            </div>
-            <div id="verse-fetch-status" style="font-size:.75rem;color:var(--muted);margin-top:5px;min-height:16px;"></div>
-          </div>
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
-            <div style="height:1px;flex:1;background:var(--border);"></div>
-            <span style="font-size:.72rem;color:var(--muted);font-weight:600;">or pick a preset</span>
-            <div style="height:1px;flex:1;background:var(--border);"></div>
-          </div>
-
           <label class="toggle-row">
             <label class="toggle"><input type="checkbox" id="custom-chk" onchange="toggleCustom()"><span class="tslider"></span></label>
             <span style="font-size:.84rem;color:var(--muted);font-weight:600;">Enter verse text manually</span>
@@ -357,37 +323,8 @@ textarea.txt-input{resize:vertical;min-height:78px;line-height:1.6;}
       </div>
     </div>
 
-    <!-- ── LIVE TAB (leader only) ── -->
-    <div id="tab-live" class="section" style="display:none;">
-      <div class="card">
-        <div class="card-heading">Live Audio Broadcast</div>
-        <div style="text-align:center;padding:10px 0;">
-          <div id="live-status-dot" style="width:16px;height:16px;border-radius:50%;background:#ef4444;margin:0 auto 12px;opacity:.3;transition:opacity .3s;"></div>
-          <div id="live-status-text" style="font-size:1rem;font-weight:700;color:var(--muted);margin-bottom:6px;">Not Broadcasting</div>
-          <div id="live-status-sub" style="font-size:.8rem;color:var(--muted);margin-bottom:24px;">Tap Go Live to stream your mic to members in real time.</div>
-          <button id="live-btn" class="btn-gold" style="width:100%;justify-content:center;font-size:1rem;padding:14px;" onclick="toggleLive()">🎙️ Go Live</button>
-          <div id="live-error" style="font-size:.75rem;color:#ef4444;margin-top:10px;min-height:16px;"></div>
-        </div>
-        <div style="margin-top:16px;background:var(--navy3);border:1px solid var(--border);border-radius:10px;padding:14px;">
-          <div style="font-size:.78rem;font-weight:700;color:var(--muted);margin-bottom:6px;">STREAM INFO</div>
-          <div style="font-size:.8rem;color:var(--text);line-height:1.6;">Members will see a Live banner in their feed and can tap to listen. The stream ends automatically when you leave this tab or close the app.</div>
-        </div>
-      </div>
-    </div>
-
     <!-- ── FEED TAB (leader + member) ── -->
     <div id="tab-feed" class="section">
-      <!-- Live Audio Player Bar -->
-      <div id="live-player-bar" style="display:none;background:linear-gradient(135deg,#7B2D2D,#C8922A);border-radius:10px;padding:12px 16px;margin-bottom:12px;align-items:center;gap:12px;">
-        <div style="width:10px;height:10px;border-radius:50%;background:#ff4444;animation:pulse 1s infinite;flex-shrink:0;"></div>
-        <div style="flex:1;">
-          <div style="font-size:.85rem;font-weight:700;color:#fff;">Live Now</div>
-          <div style="font-size:.72rem;color:rgba(255,255,255,.7);">Your leader is broadcasting</div>
-        </div>
-        <button onclick="toggleMemberAudio()" id="member-audio-btn" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);border-radius:8px;color:#fff;font-size:.8rem;font-weight:700;padding:7px 14px;cursor:pointer;">▶ Listen</button>
-        <audio id="member-audio" src=""></audio>
-      </div>
-
       <div id="feed-loading" class="empty-state">
         <div class="empty-icon">🔒</div>
         <div>Loading encrypted messages…</div>
@@ -424,7 +361,6 @@ textarea.txt-input{resize:vertical;min-height:78px;line-height:1.6;}
         <button class="btn-sm" onclick="goHome()">← Sign Out</button>
       </div>
     </div>
-
 
     <!-- ── NOTIFY TAB (member only) ── -->
     <div id="tab-notify" class="section">
@@ -472,7 +408,7 @@ textarea.txt-input{resize:vertical;min-height:78px;line-height:1.6;}
 // === STATE ===
 var mode='', userName='', roomKey=null, sbClient=null, sbChannel=null;
 var currentType='scripture', currentTrans='NIV', useCustom=false;
-var allPosts=[], lastSeen=0;
+var allPosts=[];
 
 // === INIT ===
 document.addEventListener('DOMContentLoaded',function(){
@@ -480,8 +416,8 @@ document.addEventListener('DOMContentLoaded',function(){
   document.documentElement.style.setProperty('--gold', WL.ACCENT);
   document.documentElement.style.setProperty('--gold2',WL.ACCENT2);
   document.querySelectorAll('.wl-name').forEach(function(e){e.textContent=WL.MINISTRY_NAME;});
-  document.querySelectorAll('.wl-tag').forEach(function(e){ e.textContent=WL.MINISTRY_TAG;});
-  document.querySelectorAll('.wl-icon').forEach(function(e){ e.textContent=WL.MINISTRY_ICON;});
+  document.querySelectorAll('.wl-tag').forEach(function(e){e.textContent=WL.MINISTRY_TAG;});
+  document.querySelectorAll('.wl-icon').forEach(function(e){e.textContent=WL.MINISTRY_ICON;});
   document.title=WL.MINISTRY_NAME;
   if(WL.POWERED_BY) document.querySelectorAll('.powered-by').forEach(function(e){e.style.display='block';});
   buildVerseUI();
@@ -489,8 +425,6 @@ document.addEventListener('DOMContentLoaded',function(){
 });
 
 // === CRYPTO ===
-// Key is derived from WL.ROOM_KEY — same for everyone in this group.
-// Stored only in this HTML file, never transmitted.
 async function initCrypto(){
   try{
     var keyMaterial=await crypto.subtle.importKey(
@@ -501,7 +435,6 @@ async function initCrypto(){
       {name:'PBKDF2',salt:new TextEncoder().encode('wordpal-v1'),iterations:100000,hash:'SHA-256'},
       keyMaterial, {name:'AES-GCM',length:256}, true, ['encrypt','decrypt']
     );
-    // Show fingerprint
     var raw=await crypto.subtle.exportKey('raw',roomKey);
     var hash=await crypto.subtle.digest('SHA-256',raw);
     var bytes=new Uint8Array(hash),parts=[];
@@ -530,31 +463,21 @@ function initSB(){
   catch(e){console.warn('Supabase unavailable');}
 }
 
-// Subscribe to realtime so new posts appear instantly for open members
 function subscribeRealtime(){
   if(!sbClient)return;
   sbChannel=sbClient.channel('wordpal-posts')
     .on('postgres_changes',{event:'INSERT',schema:'public',table:'wp_messages'},function(payload){
-      // A new row was inserted — decrypt and prepend to feed
       var row=payload.new;
       if(row.tenant===tenantId()){
         dec(row.payload).then(function(obj){
-          console.log('Realtime obj:', obj&&obj.type, obj);
-          if(obj){
-            // Intercept live audio markers
-            if(obj.type&&obj.type.startsWith('__live')){
-              console.log('Live marker received, mode:', mode);
-              if(mode==='member') handleLiveMessage(obj);
-              return;
-            }
+          if(obj&&obj.type&&!obj.type.startsWith('__')){
             obj._id=row.id;obj._at=row.created_at;obj._new=true;
             allPosts.unshift(obj);
             renderFeed();
             id('stat-posts').textContent=allPosts.length;
-  var pct=allPosts.length/500;
-  var sc=id('stat-posts');
-  sc.style.color=pct>=1?'#ef4444':pct>=.8?'#f59e0b':'var(--gold)';
-  var lbl=id('posts-lbl');if(lbl)lbl.textContent=allPosts.length;
+            var pct=allPosts.length/500;
+            id('stat-posts').style.color=pct>=1?'#ef4444':pct>=.8?'#f59e0b':'var(--gold)';
+            var lbl=id('posts-lbl');if(lbl)lbl.textContent=allPosts.length;
           }
         });
       }
@@ -563,8 +486,6 @@ function subscribeRealtime(){
 }
 
 function tenantId(){
-  // Combine MINISTRY_NAME + first 12 chars of ROOM_KEY for a unique tenant ID.
-  // Two churches can share the same name without colliding — the ROOM_KEY differentiates them.
   var name=WL.MINISTRY_NAME.toLowerCase().replace(/[^a-z0-9]/g,'-');
   var keySlug=WL.ROOM_KEY.toLowerCase().replace(/[^a-z0-9]/g,'').slice(0,12);
   return name+'-'+keySlug;
@@ -589,7 +510,6 @@ function submitGate(which){
   var name  = id(which==='leader'?'lg-name':'mg-name').value.trim();
   var correct = which==='leader' ? String(WL.LEADER_PIN) : String(WL.MEMBER_PIN);
   var errEl = id(which==='leader'?'lg-err':'mg-err');
-
   if(pin!==correct){
     errEl.style.display='block';
     id(which==='leader'?'lg-pin':'mg-pin').value='';
@@ -611,14 +531,12 @@ function launchApp(){
   id('mode-pill').className='mode-pill '+(mode==='leader'?'pill-leader':'pill-member');
   id('leader-tabs').style.display=mode==='leader'?'flex':'none';
   id('member-tabs').style.display=mode==='member'?'flex':'none';
-
   if(mode==='leader'){
     id('leader-name').value=userName;
     switchTab('post',document.querySelector('#leader-tabs .tab-btn'));
   } else {
     switchTab('feed',document.querySelector('#member-tabs .tab-btn'));
   }
-
   loadFeed();
   subscribeRealtime();
   if(mode==='member') initPush();
@@ -652,7 +570,6 @@ async function postMessage(){
     payload.title=id('ann-title').value.trim();payload.body=t;
   }
 
-  // Encrypt and save to Supabase
   var saved=false;
   try{
     if(sbClient){
@@ -674,11 +591,9 @@ async function postMessage(){
   renderFeed();
   id('stat-posts').textContent=allPosts.length;
   var pct=allPosts.length/500;
-  var sc=id('stat-posts');
-  sc.style.color=pct>=1?'#ef4444':pct>=.8?'#f59e0b':'var(--gold)';
+  id('stat-posts').style.color=pct>=1?'#ef4444':pct>=.8?'#f59e0b':'var(--gold)';
   var lbl=id('posts-lbl');if(lbl)lbl.textContent=allPosts.length;
 
-  // Clear inputs
   id('scripture-note').value='';
   id('disc-text').value='';
   id('pray-text').value='';
@@ -687,7 +602,7 @@ async function postMessage(){
 
   var ok=id('post-ok');ok.style.display='inline';
   setTimeout(function(){ok.style.display='none';},2000);
-  toast(saved?'🔒 Posted & encrypted':'🔒 Posted (Supabase not connected — configure to persist)');
+  toast(saved?'🔒 Posted & encrypted':'🔒 Posted (Supabase not connected)');
   btn.disabled=false;
 }
 
@@ -710,91 +625,48 @@ async function loadFeed(){
       .eq('tenant',tenantId())
       .order('created_at',{ascending:false})
       .limit(500);
-
     if(res.error)throw res.error;
-
-    // Decrypt all rows
     var rows=res.data||[];
     var decrypted=await Promise.all(rows.map(async function(row){
       var obj=await dec(row.payload);
       if(obj){obj._id=row.id;obj._at=row.created_at;obj._new=false;}
       return obj;
     }));
-    allPosts=decrypted.filter(function(o){return o&&(!o.type||!o.type.startsWith('__live'));});
+    allPosts=decrypted.filter(function(o){return o&&o.type&&!o.type.startsWith('__');});
   }catch(e){
     console.warn('Load failed:',e);
   }
 
   id('feed-loading').style.display='none';
 
-  // If feed is empty, seed with demo posts so prospects always see a full feed
+  // Seed demo posts if feed is empty
   if(allPosts.length===0){
     var now=new Date();
-    var d1=new Date(now-1000*60*60*2);   // 2 hours ago
-    var d2=new Date(now-1000*60*60*26);  // yesterday
-    var d3=new Date(now-1000*60*60*50);  // 2 days ago
-    var d4=new Date(now-1000*60*60*74);  // 3 days ago
-
+    var d1=new Date(now-1000*60*60*2);
+    var d2=new Date(now-1000*60*60*26);
+    var d3=new Date(now-1000*60*60*50);
+    var d4=new Date(now-1000*60*60*74);
     allPosts=[
-      {
-        type:'scripture',
-        from:'Pastor Mike',
-        postedAt:fmtDate(d1),
-        _at:d1.toISOString(),
-        _new:true,
-        verse:{
-          ref:'Proverbs 27:17',
-          text:'As iron sharpens iron, so one person sharpens another.',
-          trans:'NIV'
-        },
-        note:'This week we explore what it means to truly invest in each other. Come ready to share one person who has sharpened you.'
-      },
-      {
-        type:'discussion',
-        from:'Pastor Mike',
-        postedAt:fmtDate(d1),
-        _at:new Date(d1.getTime()+1000*60*3).toISOString(),
-        _new:true,
-        body:'Who in your life is sharpening you right now? And are you letting them? Come ready to share Thursday.'
-      },
-      {
-        type:'prayer',
-        from:'Pastor Mike',
-        postedAt:fmtDate(d2),
-        _at:d2.toISOString(),
-        _new:false,
-        body:'Pray for the Johnson family this week — James had surgery Monday and is recovering at home. They would appreciate meals if anyone is able.'
-      },
-      {
-        type:'announce',
-        from:'Pastor Mike',
-        postedAt:fmtDate(d3),
-        _at:d3.toISOString(),
-        _new:false,
-        title:"This Week's Meeting",
-        body:'Thursday 7PM — location moved to the Hendersons\' house. 412 Maple Drive. Please park on the street.'
-      },
-      {
-        type:'scripture',
-        from:'Pastor Mike',
-        postedAt:fmtDate(d4),
-        _at:d4.toISOString(),
-        _new:false,
-        verse:{
-          ref:'Hebrews 10:24',
-          text:'And let us consider how we may spur one another on toward love and good deeds.',
-          trans:'NIV'
-        },
-        note:'Last week - we are not meant to do this alone.'
-      }
+      {type:'scripture',from:'Pastor Mike',postedAt:fmtDate(d1),_at:d1.toISOString(),_new:true,
+       verse:{ref:'Proverbs 27:17',text:'As iron sharpens iron, so one person sharpens another.',trans:'NIV'},
+       note:'This week we explore what it means to truly invest in each other. Come ready to share one person who has sharpened you.'},
+      {type:'discussion',from:'Pastor Mike',postedAt:fmtDate(d1),_at:new Date(d1.getTime()+1000*60*3).toISOString(),_new:true,
+       body:'Who in your life is sharpening you right now? And are you letting them? Come ready to share Thursday.'},
+      {type:'prayer',from:'Pastor Mike',postedAt:fmtDate(d2),_at:d2.toISOString(),_new:false,
+       body:'Pray for the Johnson family this week — James had surgery Monday and is recovering at home. They would appreciate meals if anyone is able.'},
+      {type:'announce',from:'Pastor Mike',postedAt:fmtDate(d3),_at:d3.toISOString(),_new:false,
+       title:"This Week's Meeting",
+       body:"Thursday 7PM — location moved to the Hendersons' house. 412 Maple Drive. Please park on the street."},
+      {type:'scripture',from:'Pastor Mike',postedAt:fmtDate(d4),_at:d4.toISOString(),_new:false,
+       verse:{ref:'Hebrews 10:24',text:'Let us consider how we may spur one another on toward love and good deeds.',trans:'NIV'},
+       note:'We are not meant to do this alone.'}
     ];
   }
 
   renderFeed();
   id('stat-posts').textContent=allPosts.length;
   var pct=allPosts.length/500;
-  var sc=id('stat-posts');
-  sc.style.color=pct>=1?'#ef4444':pct>=.8?'#f59e0b':'var(--gold)';
+  id('stat-posts').style.color=pct>=1?'#ef4444':pct>=.8?'#f59e0b':'var(--gold)';
   var lbl=id('posts-lbl');if(lbl)lbl.textContent=allPosts.length;
 }
 
@@ -807,11 +679,8 @@ function renderFeed(){
     return;
   }
   id('feed-empty').style.display='none';
-
-  // Track last-seen timestamp so we can mark new items
   var lastVisit=parseInt(localStorage.getItem('wp_last_'+tenantId())||'0');
   var now=Date.now();
-
   list.innerHTML='';
   allPosts.forEach(function(p){
     var postTime=p._at?new Date(p._at).getTime():0;
@@ -821,8 +690,6 @@ function renderFeed(){
     d.innerHTML=msgHTML(p,isNew);
     list.appendChild(d);
   });
-
-  // Update last-seen
   localStorage.setItem('wp_last_'+tenantId(),now);
 }
 
@@ -844,7 +711,6 @@ function msgHTML(p,isNew){
     +'<span class="msg-date">'+date+'</span>'
     +'<span class="msg-enc">🔒</span>'
     +'</div>';
-
   var b='';
   if(p.type==='scripture'&&p.verse){
     b='<div class="msg-verse">\u201C'+p.verse.text+'\u201D</div>'
@@ -854,143 +720,31 @@ function msgHTML(p,isNew){
     if(p.title)b+='<div style="font-weight:700;font-size:.95rem;margin-bottom:6px;">'+p.title+'</div>';
     if(p.body) b+='<div class="msg-body">'+p.body+'</div>';
   }
-
   var actions='';
   if(mode==='leader'&&p._id){
     actions='<div class="msg-actions"><button class="btn-danger" onclick="deletePost(\''+p._id+'\')">🗑 Delete</button></div>';
   }
-
   return h+b+actions;
 }
 
 // === DELETE ===
 async function deletePost(pid){
   if(!confirm('Delete this post?'))return;
-  try{
-    if(sbClient)await sbClient.from('wp_messages').delete().eq('id',pid);
-  }catch(e){}
+  try{if(sbClient)await sbClient.from('wp_messages').delete().eq('id',pid);}catch(e){}
   allPosts=allPosts.filter(function(p){return p._id!==pid;});
   renderFeed();
   id('stat-posts').textContent=allPosts.length;
-  var pct=allPosts.length/500;
-  var sc=id('stat-posts');
-  sc.style.color=pct>=1?'#ef4444':pct>=.8?'#f59e0b':'var(--gold)';
   var lbl=id('posts-lbl');if(lbl)lbl.textContent=allPosts.length;
   toast('Post deleted');
 }
 
 async function confirmDeleteAll(){
   if(!confirm('Delete ALL posts for this group? This cannot be undone.'))return;
-  try{
-    if(sbClient)await sbClient.from('wp_messages').delete().eq('tenant',tenantId());
-  }catch(e){}
+  try{if(sbClient)await sbClient.from('wp_messages').delete().eq('tenant',tenantId());}catch(e){}
   allPosts=[];renderFeed();
   id('stat-posts').textContent=0;
+  var lbl=id('posts-lbl');if(lbl)lbl.textContent=0;
   toast('All posts deleted');
-}
-
-
-// === LIVE AUDIO ===
-var mediaRecorder=null, liveStream=null, liveActive=false;
-var liveCheckInterval=null;
-
-async function toggleLive(){
-  if(liveActive){ stopLive(); return; }
-  await startLive();
-}
-
-async function startLive(){
-  var errEl=id('live-error');
-  errEl.textContent='';
-  try{
-    liveStream=await navigator.mediaDevices.getUserMedia({audio:true,video:false});
-    // Connect to Icecast via WebSocket/fetch stream
-    var mimeType='audio/webm;codecs=opus';
-    if(!MediaRecorder.isTypeSupported(mimeType)) mimeType='audio/webm';
-    mediaRecorder=new MediaRecorder(liveStream,{mimeType:mimeType,audioBitsPerSecond:64000});
-
-    // Use WebSocket relay on our own server to pipe audio to Icecast
-    var wsProto=location.protocol==='https:'?'wss:':'ws:';
-    var wsUrl=wsProto+'//'+location.host+'/broadcast';
-    var audioWs=new WebSocket(wsUrl);
-
-    audioWs.onopen=function(){ console.log('Audio relay connected'); };
-    audioWs.onerror=function(e){ console.warn('Audio WS error:',e); };
-
-    mediaRecorder.ondataavailable=function(e){
-      if(e.data.size>0 && audioWs.readyState===WebSocket.OPEN){
-        audioWs.send(e.data);
-      }
-    };
-
-    mediaRecorder.start(1000); // send chunk every second
-    liveActive=true;
-
-    // Update UI
-    id('live-status-dot').style.opacity='1';
-    id('live-status-text').textContent='Broadcasting Live';
-    id('live-status-sub').textContent='Members can now hear you. Tap Stop to end.';
-    id('live-btn').textContent='⏹ Stop Broadcasting';
-    id('live-btn').style.background='linear-gradient(135deg,#ef4444,#dc2626)';
-
-    // Notify members via Supabase (post a live marker)
-    if(sbClient){
-      var livePayload=await enc({type:'__live__',url:WL.STREAM_URL,from:userName});
-      await sbClient.from('wp_messages').insert({tenant:tenantId(),payload:livePayload});
-    }
-
-  }catch(e){
-    errEl.textContent='Could not access microphone: '+e.message;
-    console.error('Live error:',e);
-  }
-}
-
-function stopLive(){
-  if(mediaRecorder){ mediaRecorder.stop(); mediaRecorder=null; }
-  if(typeof audioWs!=='undefined'&&audioWs){ audioWs.close(); audioWs=null; }
-  if(liveStream){ liveStream.getTracks().forEach(function(t){t.stop()}); liveStream=null; }
-  liveActive=false;
-  id('live-status-dot').style.opacity='.3';
-  id('live-status-text').textContent='Not Broadcasting';
-  id('live-status-sub').textContent='Tap Go Live to start streaming your mic to members';
-  id('live-btn').textContent='🎙️ Go Live';
-  id('live-btn').style.background='';
-  // Post stop marker
-  if(sbClient){
-    enc({type:'__live_stop__',from:userName}).then(function(stopPayload){
-      sbClient.from('wp_messages').insert({tenant:tenantId(),payload:stopPayload});
-    });
-  }
-}
-
-// Member side
-function toggleMemberAudio(){
-  var audio=id('member-audio');
-  var btn=id('member-audio-btn');
-  if(audio.paused){
-    audio.src=WL.STREAM_URL+'?t='+Date.now();
-    audio.play();
-    btn.textContent='⏸ Pause';
-  } else {
-    audio.pause();
-    btn.textContent='▶ Listen';
-  }
-}
-
-function handleLiveMessage(msg){
-  console.log('handleLiveMessage called:', msg.type);
-  if(msg.type==='__live__'){
-    var bar=id('live-player-bar');
-    if(!bar){console.error('live-player-bar not found');return;}
-    id('member-audio').src=msg.url||WL.STREAM_URL;
-    bar.style.display='flex';
-  } else if(msg.type==='__live_stop__'){
-    var bar=id('live-player-bar');
-    bar.style.display='none';
-    var audio=id('member-audio');
-    audio.pause();
-    audio.src='';
-  }
 }
 
 // === VERSES ===
@@ -1054,55 +808,6 @@ var VERSES={
 };
 var REFS=Object.keys(VERSES.NIV);
 
-// === BIBLE LOOKUP via Supabase Edge Function ===
-async function fetchVerse(){
-  var query=id('verse-search').value.trim();
-  var status=id('verse-fetch-status');
-  var btn=id('verse-fetch-btn');
-
-  if(!query){ status.textContent='Enter a reference first.'; return; }
-
-  btn.disabled=true;
-  btn.textContent='Loading…';
-  status.textContent='';
-  status.style.color='var(--muted)';
-
-  try{
-    var fnUrl=WL.SUPABASE_URL+'/functions/v1/bible-lookup';
-    var resp=await fetch(fnUrl,{
-      method:'POST',
-      headers:{
-        'Content-Type':'application/json',
-        'Authorization':'Bearer '+WL.SUPABASE_ANON
-      },
-      body:JSON.stringify({reference:query, translation:currentTrans})
-    });
-    var data=await resp.json();
-
-    if(data.text && data.reference){
-      useCustom=true;
-      id('custom-chk').checked=true;
-      id('preset-wrap').style.display='none';
-      id('custom-wrap').style.display='block';
-      id('cust-ref').value=data.reference;
-      id('cust-text').value=data.text;
-      updatePreview();
-      status.textContent='✓ '+data.reference+' ('+data.translation+')';
-      status.style.color='var(--safe)';
-    } else {
-      status.textContent=data.error||'Verse not found. Check reference and try again.';
-      status.style.color='#ef4444';
-    }
-  } catch(e){
-    console.error('Bible lookup error:',e);
-    status.textContent='Lookup failed -- enter verse text manually below.';
-    status.style.color='#ef4444';
-  }
-
-  btn.disabled=false;
-  btn.textContent='Lookup →';
-}
-
 function buildVerseUI(){
   var tr=id('trans-row');tr.innerHTML='';
   ['KJV','NIV','ESV','NKJV'].forEach(function(t){
@@ -1137,16 +842,14 @@ function toggleCustom(){
   updatePreview();
 }
 
-
 // === WEB PUSH ===
-var swReg = null;
-
+var swReg=null;
 async function initPush(){
-  if(!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+  if(!('serviceWorker' in navigator)||!('PushManager' in window))return;
   try{
-    swReg = await navigator.serviceWorker.register('./sw.js');
+    swReg=await navigator.serviceWorker.register('./sw.js');
     console.log('SW registered');
-  }catch(e){ console.warn('SW registration failed:',e); }
+  }catch(e){console.warn('SW registration failed:',e);}
 }
 
 function urlB64ToUint8Array(base64String){
@@ -1161,67 +864,41 @@ function urlB64ToUint8Array(base64String){
 async function handleNotifBtn(){
   var btn=id('notif-btn');
   var status=id('notif-status');
-
-  // Check if already subscribed
   if(swReg){
     var existing=await swReg.pushManager.getSubscription();
     if(existing){
-      // Already subscribed — offer to unsubscribe
       if(confirm('You already have notifications enabled. Disable them?')){
         await existing.unsubscribe();
         if(sbClient) await sbClient.from('wp_subscriptions').delete()
-          .eq('tenant',tenantId())
-          .eq('member_name',userName);
+          .eq('tenant',tenantId()).eq('member_name',userName);
         updateNotifUI('default');
         toast('Notifications disabled');
       }
       return;
     }
   }
-
-  // iOS check — must be installed to Home Screen
   var isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)&&!window.MSStream;
   var isStandalone=window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone;
-  if(isIOS&&!isStandalone){
-    id('notif-ios-hint').style.display='block';
-    return;
-  }
-
-  if(!swReg){
-    toast('Service worker not available. Make sure sw.js is deployed.');
-    return;
-  }
-
-  // Request permission
+  if(isIOS&&!isStandalone){id('notif-ios-hint').style.display='block';return;}
+  if(!swReg){toast('Service worker not available. Make sure sw.js is deployed.');return;}
   var permission=await Notification.requestPermission();
-  if(permission!=='granted'){
-    updateNotifUI('denied');
-    toast('Notifications blocked. Check your browser settings.');
-    return;
-  }
-
-  // Subscribe
+  if(permission!=='granted'){updateNotifUI('denied');toast('Notifications blocked. Check your browser settings.');return;}
   try{
     btn.textContent='Subscribing…';btn.disabled=true;
     var sub=await swReg.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: urlB64ToUint8Array(WL.VAPID_PUBLIC_KEY)
+      userVisibleOnly:true,
+      applicationServerKey:urlB64ToUint8Array(WL.VAPID_PUBLIC_KEY)
     });
-
-    // Save subscription to Supabase
     if(sbClient){
       await sbClient.from('wp_subscriptions').upsert({
-        tenant:      tenantId(),
-        member_name: userName,
-        subscription: JSON.stringify(sub.toJSON()),
-        updated_at:  new Date().toISOString()
+        tenant:tenantId(),member_name:userName,
+        subscription:JSON.stringify(sub.toJSON()),
+        updated_at:new Date().toISOString()
       },{onConflict:'tenant,member_name'});
     }
-
     updateNotifUI('granted');
     toast('🔔 Notifications enabled!');
   }catch(e){
-    console.error('Subscribe failed:',e);
     btn.textContent='Enable Notifications';btn.disabled=false;
     toast('Could not subscribe: '+e.message);
   }
@@ -1232,30 +909,24 @@ function updateNotifUI(state){
   var icon=id('notif-icon');
   var title=id('notif-title');
   var desc=id('notif-desc');
-  var status=id('notif-status');
   btn.disabled=false;
   if(state==='granted'){
-    icon.textContent='✅';
-    title.textContent='Notifications On';
+    icon.textContent='✅';title.textContent='Notifications On';
     desc.textContent="You'll get a notification on your phone whenever your leader posts something new.";
     btn.textContent='Disable Notifications';
-    status.textContent='';
   } else if(state==='denied'){
-    icon.textContent='🚫';
-    title.textContent='Notifications Blocked';
-    desc.textContent="You've blocked notifications for this site. To enable them, go to your browser settings and allow notifications for this page.";
+    icon.textContent='🚫';title.textContent='Notifications Blocked';
+    desc.textContent="You've blocked notifications for this site. Go to your browser settings to allow them.";
     btn.style.display='none';
   } else {
-    icon.textContent='🔔';
-    title.textContent='Get Notified';
+    icon.textContent='🔔';title.textContent='Get Notified';
     desc.textContent="Get a notification on your phone whenever your leader posts something new — even when the app is closed.";
-    btn.textContent='Enable Notifications';
-    btn.style.display='inline-flex';
+    btn.textContent='Enable Notifications';btn.style.display='inline-flex';
   }
 }
 
 async function checkExistingSubscription(){
-  if(!swReg) return;
+  if(!swReg)return;
   try{
     var existing=await swReg.pushManager.getSubscription();
     if(existing) updateNotifUI('granted');
@@ -1271,13 +942,10 @@ function setType(t,btn){
   ['scripture','discussion','prayer','announce'].forEach(function(x){id('panel-'+x).style.display=x===t?'block':'none';});
 }
 function switchTab(name,btn){
-  // Hide all panels
   document.querySelectorAll('.section').forEach(function(s){s.style.display='none';s.classList.remove('active');});
   var el=id('tab-'+name);if(el){el.style.display='block';el.classList.add('active');}
-  // Update tab button active state
   document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active');});
   if(btn)btn.classList.add('active');
-  // Load feed when switching to it
   if(name==='feed'&&allPosts.length===0)loadFeed();
   if(name==='notify')checkExistingSubscription();
 }
@@ -1287,20 +955,5 @@ function id(x){return document.getElementById(x);}
 var _tt;
 function toast(msg){var t=id('toast');t.textContent=msg;t.classList.add('show');clearTimeout(_tt);_tt=setTimeout(function(){t.classList.remove('show');},2800);}
 </script>
-
-<!-- ── SUPABASE SCHEMA (run this in Supabase SQL Editor) ────────────────────
-CREATE TABLE IF NOT EXISTS wp_messages (
-  id          uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-  tenant      text NOT NULL,
-  payload     text NOT NULL,
-  created_at  timestamptz DEFAULT now()
-);
-CREATE INDEX IF NOT EXISTS wp_messages_tenant_idx ON wp_messages(tenant, created_at DESC);
-ALTER TABLE wp_messages ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "anon read"   ON wp_messages FOR SELECT USING (true);
-CREATE POLICY "anon insert" ON wp_messages FOR INSERT WITH CHECK (true);
-CREATE POLICY "anon delete" ON wp_messages FOR DELETE USING (true);
-──────────────────────────────────────────────────────────────────────────── -->
-
 </body>
 </html>
