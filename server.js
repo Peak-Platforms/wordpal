@@ -8,7 +8,7 @@ const PORT = process.env.PORT || 8080;
 // Icecast / AzuraCast settings
 const ICECAST_HOST = '157.245.208.49';
 const ICECAST_PORT = 8010;
-const ICECAST_MOUNT = '/live';
+const ICECAST_MOUNT = '/live.mp3';
 const ICECAST_USER = 'source';
 const ICECAST_PASS = 'rcnYnytt';
 
