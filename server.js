@@ -2,10 +2,11 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const { WebSocketServer } = require('ws');
+const { spawn } = require('child_process');
 
 const PORT = process.env.PORT || 8080;
 
-// Icecast / AzuraCast settings
+// AzuraCast Icecast source settings
 const ICECAST_HOST = '157.245.208.49';
 const ICECAST_PORT = 8010;
 const ICECAST_MOUNT = '/live.mp3';
@@ -22,12 +23,11 @@ const MIME = {
 };
 
 // -----------------------------
-// HTTP SERVER (serves frontend)
+// HTTP SERVER (frontend)
 // -----------------------------
 const server = http.createServer((req, res) => {
   let filePath = req.url === '/' ? '/index.html' : req.url;
   filePath = filePath.split('?')[0];
-
   let fullPath = path.join(__dirname, filePath);
 
   if (!path.extname(fullPath) && !fs.existsSync(fullPath)) {
@@ -42,7 +42,6 @@ const server = http.createServer((req, res) => {
       res.end('Not found');
       return;
     }
-
     res.writeHead(200, { 'Content-Type': MIME[ext] || 'text/plain' });
     res.end(data);
   });
@@ -54,65 +53,53 @@ const server = http.createServer((req, res) => {
 const wss = new WebSocketServer({ server, path: '/broadcast' });
 
 wss.on('connection', (ws) => {
+  console.log('Leader connected — starting FFmpeg → Icecast stream');
 
-  console.log('Leader connected — starting Icecast stream');
+  // Base64 authorization
+  const auth = Buffer.from(`${ICECAST_USER}:${ICECAST_PASS}`).toString('base64');
 
-  const auth = Buffer
-    .from(`${ICECAST_USER}:${ICECAST_PASS}`)
-    .toString('base64');
+  // Spawn FFmpeg to convert WebM/Opus from browser to MP3 for Icecast
+  const ffmpeg = spawn('ffmpeg', [
+    '-f', 'webm',            // input format
+    '-i', 'pipe:0',          // read from stdin (WebSocket)
+    '-c:a', 'libmp3lame',    // MP3 encoder
+    '-b:a', '192k',          // bitrate
+    '-content_type', 'audio/mpeg',
+    '-f', 'mp3',             // output format
+    `icecast://source:rcnYnytt@${ICECAST_HOST}:${ICECAST_PORT}${ICECAST_MOUNT}`
+  ]);
 
-  const options = {
-    hostname: ICECAST_HOST,
-    port: ICECAST_PORT,
-    path: ICECAST_MOUNT,
-    method: 'SOURCE',
-    headers: {
-      'Authorization': `Basic ${auth}`,
-      'Content-Type': 'audio/webm;codecs=opus',
-      'Ice-Name': 'WordPal Live',
-      'Ice-Description': 'WordPal Live Broadcast',
-      'Ice-Public': '0',
-      'Ice-Audio-Info': 'bitrate=64'
-    }
-  };
-
-  const iceReq = http.request(options, (res) => {
-    console.log('Icecast response:', res.statusCode);
-
-    if (res.statusCode !== 200) {
-      console.error('Icecast rejected stream');
-      ws.close();
-    }
+  ffmpeg.stderr.on('data', (data) => {
+    // FFmpeg logs
+    console.log(`FFmpeg: ${data.toString()}`);
   });
 
-  iceReq.on('error', (err) => {
-    console.error('Icecast connection error:', err.message);
-    ws.close();
+  ffmpeg.on('exit', (code, signal) => {
+    console.log(`FFmpeg exited with code ${code}, signal ${signal}`);
   });
 
-  // Relay audio chunks from browser to Icecast
+  ffmpeg.on('error', (err) => {
+    console.error('FFmpeg error:', err.message);
+  });
+
+  // Receive audio chunks from browser and pipe into FFmpeg stdin
   ws.on('message', (data) => {
     try {
-      iceReq.write(data);
+      ffmpeg.stdin.write(data);
     } catch (err) {
-      console.error('Write error:', err.message);
+      console.error('FFmpeg stdin write error:', err.message);
     }
   });
 
   ws.on('close', () => {
-    console.log('Leader disconnected — ending Icecast stream');
-    try {
-      iceReq.end();
-    } catch {}
+    console.log('Leader disconnected — closing FFmpeg');
+    try { ffmpeg.stdin.end(); } catch {}
   });
 
   ws.on('error', (err) => {
     console.error('WebSocket error:', err.message);
-    try {
-      iceReq.end();
-    } catch {}
+    try { ffmpeg.stdin.end(); } catch {}
   });
-
 });
 
 // -----------------------------
