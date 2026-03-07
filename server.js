@@ -6,9 +6,10 @@ const { WebSocketServer } = require('ws');
 
 const PORT = process.env.PORT || 3000;
 const ICECAST_HOST = '157.245.208.49';
-const ICECAST_PORT = 8010;
-const ICECAST_MOUNT = '/live.mp3';
-const ICECAST_PASS = 'rcnYnytt';
+const ICECAST_PORT = 8015;
+const ICECAST_MOUNT = '/';
+const ICECAST_USER = 'wordpal';
+const ICECAST_PASS = 'broadcast2025';
 
 // MIME types for static files
 const MIME = {
@@ -48,7 +49,7 @@ const wss = new WebSocketServer({ server, path: '/broadcast' });
 wss.on('connection', (ws) => {
   console.log('Leader connected — opening Icecast connection');
 
-  const auth = Buffer.from(`source:${ICECAST_PASS}`).toString('base64');
+  const auth = Buffer.from(`${ICECAST_USER}:${ICECAST_PASS}`).toString('base64');
 
   // Open persistent connection to Icecast
   const iceReq = http.request({
