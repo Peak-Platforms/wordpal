@@ -7,7 +7,7 @@ const { WebSocketServer } = require('ws');
 const PORT = process.env.PORT || 3000;
 const ICECAST_HOST = '157.245.208.49';
 const ICECAST_PORT = 8010;
-const ICECAST_MOUNT = '/radio.mp3';
+const ICECAST_MOUNT = '/live.mp3';
 const ICECAST_PASS = 'rcnYnytt';
 
 // MIME types for static files
@@ -62,6 +62,8 @@ wss.on('connection', (ws) => {
       'Transfer-Encoding': 'chunked',
       'Ice-Name': 'WordPal Live',
       'Ice-Public': '0',
+      'Ice-Audio-Info': 'bitrate=64',
+      'Expect': '100-continue',
     }
   }, (res) => {
     console.log('Icecast response:', res.statusCode);
